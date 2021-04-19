@@ -16,6 +16,10 @@ import qbittorrentapi
 
 qbt = qbittorrentapi.Client(host='localhost:8080', username='admin', password='adminadmin')
 disk_MAX = 32
+min_SEEDTIME = 288000
+tags_PRIO = ["PUBLIC"]
+tags_PREF = ["YGG", "CASA"]
+tags_EXCLUD = ["PERSO", "DONOT"]
 
 ###############################
 ####      Fonction        #####
@@ -42,12 +46,19 @@ def scoretorrent():
     for torrent in qbt.torrents_info():
         l_hash = torrent.hash
         l_seed = torrent.seeding_time
-        if l_seed > 288000:
+        if l_seed > min_SEEDTIME:
             s_seed = 100
         else:
             s_seed = 0
         s_ratio = torrent.ratio
-        s_score = s_ratio + s_seed
+        t_tag = torrent.tags
+        if t_tag in tags_PRIO:
+            s_tag = 1000
+        elif t_tag in tags_PREF:
+            s_tag = 100
+        else:
+            s_tag = 0
+        s_score = s_ratio + s_seed + s_tag
         data[l_hash] = s_score
     return data
 
