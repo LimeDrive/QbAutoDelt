@@ -7,6 +7,15 @@
 import psutil
 import schedule
 import time
+import qbittorrentapi
+
+
+###############################
+####    Variable Global   #####
+###############################
+
+qbt = qbittorrentapi.Client(host='localhost:8080', username='admin', password='adminadmin')
+disk_MAX = 80
 
 ###############################
 ####      Fonction        #####
@@ -18,11 +27,13 @@ def diskusagecontrol():
     percent = round(stat.percent)
     return percent
 
-###############################
-####    Variable Global   #####
-###############################
-
-disk_MAX = 80
+def apitest():
+    try:
+        qbt.auth_log_in()
+    except qbittorrentapi.LoginFailed as e:
+        print(e)
+    print(f'qBittorrent: {qbt.app.version}')
+    print(f'qBittorrent Web API: {qbt.app.web_api_version}')
 
 ###############################
 ####        Script        #####
@@ -37,6 +48,7 @@ while True:
         print("INFO " + t + " : Espace disque à " + str(disk_REAL) + "%")
         time.sleep(5*60)
     else:
+        apitest()
         print("TO-DO")
         time.sleep(5*60)
     
