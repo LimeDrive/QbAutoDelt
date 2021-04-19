@@ -4,7 +4,7 @@
 
 ### TO DO
 - proper readme
-- def quelle torrent sont pertiant a supp ?
+- def quelle torrent sont pertinant a supp ?
 
 ## idés de base :
 Script/app permetant de supprimé automatiquement des torrent de qBittorrent, en fonction de leur pertiance.
