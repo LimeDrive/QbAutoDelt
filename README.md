@@ -5,6 +5,7 @@
 ### TO DO
 - proper readme
 - def quelle torrent sont pertinant a supp ?
+- Fichier de conf yaml pour l'user
 
 ## idés de base :
 Script/app permetant de supprimé automatiquement des torrent de qBittorrent, en fonction de leur pertiance.

@@ -1,12 +1,12 @@
 
 #!/usr/bin/env python3
 
-#
-#
-#
+# Tourne en boucle toutes les 5 mins
 #
 
 import psutil
+import schedule
+import time
 
 ###############################
 ####      Fonction        #####
@@ -21,13 +21,21 @@ def diskusagecontrol():
 ###############################
 ####    Variable Global   #####
 ###############################
-disk_REAL = diskusagecontrol()
+
 disk_MAX = 80
 
 ###############################
 ####        Script        #####
 ###############################
-if disk_MAX >= disk_REAL:
-    print("INFO : Espace disque à " + str(disk_REAL) + "%")
-else:
-    print("inferieur")
+
+while True:
+
+    disk_REAL = diskusagecontrol()
+
+    if disk_MAX >= disk_REAL:
+        print("INFO : Espace disque à " + str(disk_REAL) + "%")
+        time.sleep(5*60)
+    else:
+        print("TO-DO")
+        time.sleep(5*60)
+    
