@@ -27,6 +27,7 @@ def diskusagecontrol():
     percent = round(stat.percent)
     return percent
 
+# Simple test de l'api qBittorrent
 def apitest():
     try:
         qbt.auth_log_in()
@@ -35,11 +36,26 @@ def apitest():
     print(f'qBittorrent: {qbt.app.version}')
     print(f'qBittorrent Web API: {qbt.app.web_api_version}')
 
+# Vas récupéré les torrent, leur hash, leur donné un score. pour retouné un dico.
+def scoretorrent():
+    data = dict()
+    for torrent in qbt.torrents_info():
+        l_hash = torrent.hash
+        l_seed = torrent.seeding_time
+        if l_seed > 288000:
+            s_seed = 100
+        else:
+            s_seed = 0
+        s_ratio = torrent.ratio
+        s_score = s_ratio + s_seed
+        data[l_hash] = s_score
+    return data
+
 ###############################
 ####        Script        #####
 ###############################
 
-while True:
+""" while True:
 
     disk_REAL = diskusagecontrol()
 
@@ -48,11 +64,16 @@ while True:
         print("INFO " + t + " : Espace disque à " + str(disk_REAL) + "%")
     else:
         apitest()
+        data = scoretorrent()
         i = diskusagecontrol()
         while i > disk_MAX:
             i = diskusagecontrol()
             time.sleep(20)
         print("TO-DO must be done lool")
 
-    time.sleep(5*60)
-    
+    time.sleep(5*60) """
+
+
+data = scoretorrent()
+
+print(data)
