@@ -4,7 +4,7 @@
 import psutil
 
 
-# % disque usage
+# % disque usage ./ comme path sur mac a l'air ok, a voir sur linux, et a mettre dans une variable
 def diskusagecontrol():
     stat = psutil.disk_usage('./')
     percent = round(stat.percent)
