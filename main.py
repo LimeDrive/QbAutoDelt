@@ -33,7 +33,8 @@ while True:
     disk_REAL = diskusagecontrol()
 
     if disk_MAX >= disk_REAL:
-        print("INFO : Espace disque à " + str(disk_REAL) + "%")
+        t = time.asctime()
+        print("INFO " + t + " : Espace disque à " + str(disk_REAL) + "%")
         time.sleep(5*60)
     else:
         print("TO-DO")
