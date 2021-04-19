@@ -15,7 +15,7 @@ import qbittorrentapi
 ###############################
 
 qbt = qbittorrentapi.Client(host='localhost:8080', username='admin', password='adminadmin')
-disk_MAX = 80
+disk_MAX = 32
 
 ###############################
 ####      Fonction        #####
@@ -46,9 +46,13 @@ while True:
     if disk_MAX >= disk_REAL:
         t = time.asctime()
         print("INFO " + t + " : Espace disque à " + str(disk_REAL) + "%")
-        time.sleep(5*60)
     else:
         apitest()
-        print("TO-DO")
-        time.sleep(5*60)
+        i = diskusagecontrol()
+        while i > disk_MAX:
+            i = diskusagecontrol()
+            time.sleep(20)
+        print("TO-DO must be done lool")
+
+    time.sleep(5*60)
     
