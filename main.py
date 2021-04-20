@@ -45,7 +45,7 @@ logger.info(f'Conection with qBt Web Api tested OK : version:  {qbt.app.web_api_
 def diskusagecontrol():
     stat = psutil.disk_usage(cfg["disk"]["PATH"])
     percent = round(stat.percent)
-    logger.debug('Disque usage calcul')
+    logger.debug('Disque usage calculation done.')
     return percent
 
 # Vas récupéré les torrent, leur hash, leur donné un score. pour retouné un dico.
