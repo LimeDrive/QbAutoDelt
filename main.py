@@ -2,7 +2,7 @@
 #!/usr/bin/env python3
 
 #
-# Tourne en boucle toutes les 5 mins
+# Tourne en boucle toutes les xx mins
 #
 # Supprime en priorité les torrent qui on un minimum de SEEDTIME (defini par l'user en heur)
 # Passe devant ceux qui on le plus de ratio
@@ -18,7 +18,6 @@ import operator
 import qbittorrentapi
 import yaml
 
-
 ###############################
 ####    Variable Global   #####
 ###############################
@@ -27,22 +26,12 @@ import yaml
 with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
     cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-qbt_host = cfg["qbt_log"]["qbt_host"]
-qbt_user = cfg["qbt_log"]["qbt_user"]
-qbt_pass = cfg["qbt_log"]["qbt_pass"]
-disk_MAX = cfg["disk_MAX"]
-min_SEEDTIME = cfg["t_statistique"]["min_SeedTime"]*60*60
-min_ratio = cfg["t_statistique"]["min_Ratio"]
-tags_PRIO = cfg["t_tags"]["priority"]
-tags_PREF = cfg["t_tags"]["prefer"]
-tags_EXCLUD = cfg["t_tags"]["exclud"]
-time_interval = cfg["interval"]
 
 ###############################
 ####    Conection API     #####
 ###############################
 
-qbt = qbittorrentapi.Client(host=qbt_host, username=qbt_user, password=qbt_pass)
+qbt = qbittorrentapi.Client(host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_log"]["qbt_user"], password=cfg["qbt_log"]["qbt_pass"])
 try:
     qbt.auth_log_in()
 except qbittorrentapi.LoginFailed as e:
@@ -56,12 +45,17 @@ print(f'qBittorrent Web API: {qbt.app.web_api_version}')
 
 # % disque usage ./ comme path sur mac a l'air ok, a voir sur linux, PATH a mettre dans une variable
 def diskusagecontrol():
-    stat = psutil.disk_usage('./')
+    stat = psutil.disk_usage(cfg["disk"]["PATH"])
     percent = round(stat.percent)
     return percent
 
 # Vas récupéré les torrent, leur hash, leur donné un score. pour retouné un dico.
 def scoretorrent():
+    min_SEEDTIME = cfg["t_statistique"]["min_SeedTime"]*60*60
+    min_ratio = cfg["t_statistique"]["min_Ratio"]
+    tags_PRIO = cfg["t_tags"]["priority"]
+    tags_PREF = cfg["t_tags"]["prefer"]
+    tags_EXCLUD = cfg["t_tags"]["exclud"]
     data = dict()
     for torrent in qbt.torrents_info():
         l_hash = torrent.hash
@@ -94,15 +88,16 @@ def scoretorrent():
 
 while True:
 
+    disk_P = cfg["disk"]["MAX"]
     disk_REAL = diskusagecontrol()
 
-    if disk_MAX >= disk_REAL:
+    if disk_P >= disk_REAL:
         t = time.asctime()
         print("INFO " + t + " : Espace disque à " + str(disk_REAL) + "%")
     else:
         data = scoretorrent()
         i = diskusagecontrol()
-        while i > disk_MAX:
+        while i > disk_P:
             max_key = max(data, key = data.get)
             qbt.torrents_delete(delete_files=True, torrent_hashes=max_key)
             time.sleep(5)
@@ -112,4 +107,4 @@ while True:
             time.sleep(15)
         print("TO-DO")
 
-    time.sleep(time_interval * 60)
+    time.sleep(cfg["interval"] * 60)

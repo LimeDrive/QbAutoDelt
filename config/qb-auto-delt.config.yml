@@ -6,7 +6,9 @@ qbt_log:
   qbt_pass: "adminadmin"
 
 ## Pourcentage d'espace disk qui déclanche la suppretion des torrents :
-disk_MAX: 80
+disk:
+  MAX: 80
+  PATH: './'
 
 ## Intervale entre les exécution du programme en minute
 interval: 10
