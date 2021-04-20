@@ -55,6 +55,7 @@ def scoretorrent():
     tags_PRIO = cfg["t_tags"]["priority"]
     tags_PREF = cfg["t_tags"]["prefer"]
     tags_EXCLUD = cfg["t_tags"]["exclud"]
+    tags_STATE = cfg["t_tags"]["states"]
     data = dict()
     for torrent in qbt.torrents_info():
         l_hash = torrent.hash
@@ -77,8 +78,16 @@ def scoretorrent():
             s_tag = -10000
         else:
             s_tag = 0
-        s_score = s_ratio + s_seed + s_tag
+        t_state = torrent.state
+        if t_state in tags_STATE:
+            s_state = -99999999999
+        else:
+            s_state = 0
+        s_score = s_ratio + s_seed + s_tag + s_state
         data[l_hash] = s_score
+        #tname = torrent.name
+        #logger.debug(f"{tname} :\nRatio: {str(t_ratio)}/={str(s_ratio)}   SeedTime: {str(t_seed)}/={str(s_seed)} \
+        #      Tag: {t_tag}/={str(s_tag)}   State: {t_state}/={str(s_state)}\nFinale Scored: {str(s_score)}")
     logger.info('Torrents fully scored...')
     return data
 
