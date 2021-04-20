@@ -10,7 +10,7 @@ import logging
 import logging.config
 
 ###############################
-####        Logger        #####
+####        Logging       #####
 ###############################
 
 logging.config.fileConfig('logging.conf')
