@@ -1,79 +1,23 @@
 # qb-auto-delt
 
-## init repo
+**Script/dockerapp** permetant de supp automatiquement des torrents de qBittorrent, en fonction de leur pertiance.
+Il control l'espace disque de la seedbox a interval réguliere, pour le maintenire à un % défini.
+Le choix des torrents a supp en priorité et fait en fonction de leur temps de seed et leur ratio.
+Cela respecte donc les H&R des tracker priver.
+Des exéption son possible grace a l'ajout manuel d'étiquette sur les torrent concerné dans qBt.
 
-### TO DO
+Le script à pour l'instant vocation a tounez dans un environement python en docker.
+
+## TO DO
+
 - proper readme
-- def quelle torrent sont pertinant a supp ?
-- Fichier de conf yaml pour l'user
+- add condition with lower scord to : state = downloding torrents to advoid PRIO tag to be supp to early.
+- notification discod and/or télégramme
+- requirement.txt for python
+- docker file
 
-## idés de base :
-Script/app permetant de supprimé automatiquement des torrent de qBittorrent, en fonction de leur pertiance.
-***
-    DiskSpace = # Valeur Espace disk en %
-    
-    DiskTaget = Valeur ( defini dans un json de reglage )
-    
-    PrefertLBL = "" # Label qui seront preferet pour supp ( defini dans un json de reglage )
-    PrioLabel = "" # Label qui on une haute priorité pour supp ( defini dans un json de reglage )
-    EcludLabel = "" # Label a exclure de la supp ( defini dans un json de reglage )
-    
-        if DiskSpace >= DiskTaget then
-            print log
-            END Script...
-    
-        else
-    
-            SortTorrent() # Trie and Score les Torrents actif
-    
-                Boucle While, DiskSpace >= DiskTaget
-                    SuppHighScoredTorrent()
-                    delay 30 second
-                    dSpace();
-    
-    
-            Print log
-            END Script
-    
-    
-    fonction(dSpace);
-        # redéfini la valeur de DiskSpace
-    
-    
-    fonction(SortTorrent);		
-        # Boucle for sur l'api qui liste les torrent par leur hash	
-        # Classement des Torrents dans un dico avec des Score : Pour chaque hash
-        # Connection RPC
-    
-        SortedTorrent = {}
-    
-        For hash in Api.List.Torrent.Hash: 
-    
-            SeedTime = Api.Torrent.seedTime(hash)
-            Label = Api.Torrent.Label(hash)
-            Ratio = Api.Torrent.Ratio(hash)
-            Score = 0
-    
-            Score = Score + Ratio
-    
-            if SeedTime > 288000: # 80 Heure
-                Score = Score + 100
-    
-            if Label == PrefertLBL:
-                Score = Score + 100
-            elif Label == PrioLBL:
-                Score = Score + 1000
-            elif Label == EcludLabel:
-                Score = 0
-    
-            SortedTorrent[hash] = Score
-    
-    fonction(SuppHighScoredTorrent);
-        # Connection RPC
-        # Suppression du hash associer a la +haute Valeur de Score dans le dico
-        # Notification
 
-## Exemple de retour api :
+### Note : Exemple de retour api :
 
     >>> print(torrent)
 
