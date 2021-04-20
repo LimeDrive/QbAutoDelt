@@ -1,22 +1,20 @@
 
 #!/usr/bin/env python3
 
-#
-# Tourne en boucle toutes les xx mins
-#
-# Supprime en priorité les torrent qui on un minimum de SEEDTIME (defini par l'user en heur)
-# Passe devant ceux qui on le plus de ratio
-# Chaque semaine de seed supplemantaire au SEEDTIME mini est scores comme 1 de ratio
-# Les Tag PRIO sont peut import le ratio et le seedtime
-# Les Tag PREFERT font monter les torrent en priorité, apré les PRIO
-# peut import le ratio et le seed il ne respecte pas non plus le seedtime
-#
-
 import psutil
 import time
 import operator
 import qbittorrentapi
 import yaml
+import logging
+import logging.config
+
+###############################
+####        Logging       #####
+###############################
+
+logging.config.fileConfig('logging.conf')
+logger = logging.getLogger(__name__)
 
 ###############################
 ####    Variable Global   #####
@@ -35,9 +33,9 @@ qbt = qbittorrentapi.Client(host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_l
 try:
     qbt.auth_log_in()
 except qbittorrentapi.LoginFailed as e:
-    print(e)
-print(f'qBittorrent: {qbt.app.version}')
-print(f'qBittorrent Web API: {qbt.app.web_api_version}')
+    logger.warning('Conection with qBittorrent and Web Api failed')
+logger.info(f'Conection with qBittorrent tested OK : version:  {qbt.app.version}')
+logger.info(f'Conection with qBt Web Api tested OK : version:  {qbt.app.web_api_version}')
 
 ###############################
 ####      Fonction        #####
@@ -47,6 +45,7 @@ print(f'qBittorrent Web API: {qbt.app.web_api_version}')
 def diskusagecontrol():
     stat = psutil.disk_usage(cfg["disk"]["PATH"])
     percent = round(stat.percent)
+    logger.debug('Disque usage calculation done.')
     return percent
 
 # Vas récupéré les torrent, leur hash, leur donné un score. pour retouné un dico.
@@ -80,6 +79,7 @@ def scoretorrent():
             s_tag = 0
         s_score = s_ratio + s_seed + s_tag
         data[l_hash] = s_score
+    logger.info('Torrents fully scored...')
     return data
 
 ###############################
@@ -92,19 +92,24 @@ while True:
     disk_REAL = diskusagecontrol()
 
     if disk_P >= disk_REAL:
-        t = time.asctime()
-        print("INFO " + t + " : Espace disque à " + str(disk_REAL) + "%")
+        logger.info("...........Disk use at :  " + str(disk_REAL) + "% ..keep going.")
     else:
         data = scoretorrent()
         i = diskusagecontrol()
         while i > disk_P:
             max_key = max(data, key = data.get)
             qbt.torrents_delete(delete_files=True, torrent_hashes=max_key)
-            time.sleep(5)
-            print("Good news Torrent supp log plus précis a faire")
+            logger.info('Torrent delted')
+            time.sleep(3)
             del data[max_key]
             i = diskusagecontrol()
+            logger.info('Sleep for 15 seconds')
             time.sleep(15)
-        print("TO-DO")
+        looger.info('Good enough for today ! Stop Dll, otherwise im gone delet everyting...')
+        time.sleep(5)
+        looger.info('rm -rf / ? ready... ?')
 
-    time.sleep(cfg["interval"] * 60)
+    inter = cfg["interval"] * 60
+    logger.info(f"Start interval of - {str(inter)} - seconds")
+    time.sleep(inter)
+    logger.debug('Script restart')
