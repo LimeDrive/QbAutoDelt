@@ -31,3 +31,10 @@ t_tags:
   exclud:
     - "DONOT"
     - "PERSO"
+  states:
+    - "checkingDL"
+    - "allocating"
+    - "checkingResumeData"
+    - "downloading"
+    - "metaDL"
+    - "moving"
