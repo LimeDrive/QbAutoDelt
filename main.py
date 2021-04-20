@@ -70,6 +70,8 @@ def scoretorrent():
             s_tag = 9999999
         elif t_tag in tags_PREF:
             s_tag = 10000
+        elif t_tag in tags_EXCLUD:
+            s_tag = -10000
         else:
             s_tag = 0
         s_score = s_ratio + s_seed + s_tag
