@@ -1,6 +1,8 @@
 certifi==2020.12.5
 chardet==4.0.0
 idna==2.10
+logging==0.4.9.6
+logging-config==1.0.4
 psutil==5.8.0
 PyYAML==5.4.1
 qbittorrent-api==2021.4.20
