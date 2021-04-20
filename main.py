@@ -13,24 +13,30 @@
 #
 
 import psutil
-import schedule
 import time
 import operator
 import qbittorrentapi
+import yaml
 
 
 ###############################
 ####    Variable Global   #####
 ###############################
 
-qbt_host = 'localhost:8080'
-qbt_user = 'admin'
-qbt_pass = 'adminadmin'
-disk_MAX = 80
-min_SEEDTIME = 1*60*60
-tags_PRIO = ["PUBLIC"]
-tags_PREF = ["YGG", "CASA"]
-tags_EXCLUD = ["PERSO", "DONOT"]
+## Import from Yaml config/qb-auto-delt.config.yml
+with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
+    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+qbt_host = cfg["qbt_log"]["qbt_host"]
+qbt_user = cfg["qbt_log"]["qbt_user"]
+qbt_pass = cfg["qbt_log"]["qbt_pass"]
+disk_MAX = cfg["disk_MAX"]
+min_SEEDTIME = cfg["t_statistique"]["min_SeedTime"]*60*60
+min_ratio = cfg["t_statistique"]["min_Ratio"]
+tags_PRIO = cfg["t_tags"]["priority"]
+tags_PREF = cfg["t_tags"]["prefer"]
+tags_EXCLUD = cfg["t_tags"]["exclud"]
+time_interval = cfg["interval"]
 
 ###############################
 ####    Conection API     #####
@@ -63,13 +69,17 @@ def scoretorrent():
         if l_seed > min_SEEDTIME:
             s_seed = round(100 + (l_seed - min_SEEDTIME) / 6000, 2)
         else:
-            s_seed = 0
-        s_ratio = torrent.ratio * 100
+            s_seed = -10000
+        t_ratio = torrent.ratio
+        if t_ratio < min_ratio:
+            s_ratio = -10000
+        else:
+            s_ratio = t_ratio * 100
         t_tag = torrent.tags
         if t_tag in tags_PRIO:
             s_tag = 9999999
         elif t_tag in tags_PREF:
-            s_tag = 10000
+            s_tag = 100000
         elif t_tag in tags_EXCLUD:
             s_tag = -10000
         else:
@@ -102,11 +112,4 @@ while True:
             time.sleep(15)
         print("TO-DO")
 
-    time.sleep(5*60)
-
-
-# data = scoretorrent()
-
-# print(data)
-# max_key = max(data, key = data.get)
-# print(max_key)
+    time.sleep(time_interval * 60)
