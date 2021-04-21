@@ -32,7 +32,7 @@ qbt = qbittorrentapi.Client(host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_l
 try:
     qbt.auth_log_in()
 except qbittorrentapi.LoginFailed as e:
-    logger.warning('Conection with qBittorrent and Web Api failed')
+    logger.warning(f'Conection with qBittorrent and Web Api failed: \n{e}')
 logger.info(f'Conection with qBittorrent tested OK : version:  {qbt.app.version}')
 logger.info(f'Conection with qBt Web Api tested OK : version:  {qbt.app.web_api_version}')
 
@@ -44,7 +44,7 @@ logger.info(f'Conection with qBt Web Api tested OK : version:  {qbt.app.web_api_
 def diskusagecontrol():
     stat = psutil.disk_usage(cfg["disk"]["PATH"])
     percent = round(stat.percent)
-    logger.debug('Disque usage calculation done.')
+    logger.debug('Disque usage calculation OK')
     return percent
 
 # Vas récupéré les torrent, leur hash, leur donné un score. pour retouné un dico.
@@ -91,8 +91,7 @@ def scoretorrent():
         #     {tname} :\n \
         #     Ratio: {str(t_ratio)}/={str(s_ratio)}   SeedTime: {str(t_seed)}/={str(s_seed)}   Tag: {t_tag}/={str(s_tag)}   State: {t_state}/={str(s_state)}\n \
         #     Final Score: {str(s_score)}" )
-    logger.info( 'Torrents fully scored...' )
-    # logger.debug( "Dico data update : " + str(data) )
+    logger.debug( "Dico data update, torrent scored : \n" + str(data) )
     return data
 
 ###############################
