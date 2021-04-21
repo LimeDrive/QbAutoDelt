@@ -27,15 +27,32 @@ def qBitConnection(logger, cfg):
 ####      Fonction        #####
 ###############################
 
-# % disque usage ./ comme path sur mac a l'air ok, a voir sur linux, PATH a mettre dans une variable
-def diskUsageControl():
-    stat = psutil.disk_usage(cfg["disk"]["PATH"])
-    percent = round(stat.percent)
-    logger.debug(f'Disque usage calculation OK result : {str(percent)}')
-    return percent
+def diskUsageControl(logger, cfg):
+    mtd = cfg["ControlMethode"]
+    if mtd:
+        logger.debug("Control method : diskUsageByGiB select")
+        limit = cfg["diskUsageByGiB"]["val"]
+        i = qbt.sync.maindata.delta()
+        free = round(i.server_state.free_space_on_disk / 2 ** 30)
+        ctrlDisk = True if limit > free else False
+        if ctrlDisk is True:
+            logger.info(f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} -  Over than {str(limit - free)} GiB, deleting script start")
+        else:
+            logger.info(f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {str(free - limit)} % before deleting script process")
+    else:
+        logger.debug("Control method : diskUsageByPercent select")
+        stat = psutil.disk_usage(cfg["diskUsageByPercent"]["path"])
+        percent = round(stat.percent)
+        limit = cfg["diskUsageByPercent"]["max"]
+        ctrlDisk = True if percent > limit else False
+        if ctrlDisk is True:
+            logger.info(f"Disk Space use at {str(percent)}% -  Over than {str(percent - limit)} %, deleting script start")
+        else:
+            logger.info(f"Disk Space use at {str(percent)}% - Your allow to fill up {str(limit - percent)} % before deleting script process")
+    return ctrlDisk
+    
 
-# Va récupérer les torrents, leur hash, leur donne un score, puis retourne le tout sous forme de dictionnaire
-def scoreTorrent():
+def scoreTorrent(cfg, qbt):
     min_time = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
     min_ratio = cfg["t_statistique"]["min_Ratio"]
     tgprio = cfg["t_tags"]["priority"]
@@ -74,28 +91,24 @@ if __name__ == '__main__':
     # Try to establish Qbittorrent connection
     qbt = qBitConnection(logger, cfg)
 
+
     while True:
 
-        disk_P = cfg["disk"]["MAX"]
-        disk_REAL = diskUsageControl()
-
-        if disk_P >= disk_REAL:
-            logger.info(f"Disk Space use at {str(disk_REAL)}% - Your allow to fill up {str(disk_P - disk_REAL)}% before deleting script process")
-            # scoreTorrent() # for testing
-        else:
-            data = scoreTorrent()
-            i = diskUsageControl()
-            logger.info(f"Disk Space use at {str(disk_REAL)}% -  Over than {str(disk_REAL - disk_P)}%, deleting script start")
-            while i > disk_P:
+        ctrl = diskUsageControl(logger, cfg)
+        scoreTorrent(cfg, qbt)
+        if ctrl:
+            data = scoreTorrent(cfg, qbt)
+            i = diskUsageControl(logger, cfg)
+            while i is True:
                 t = max(data, key = data.get)
                 qbt.torrents_delete(delete_files=True, torrent_hashes=t[1])
                 time.sleep(3)
                 size = humanize.naturalsize(t[2], binary=True)
                 logger.info(f'Script delete: {t[0]}, {str(size)} free up.')
                 del data[max_key]
-                logger.debug('Sleep for 15 seconds')
-                time.sleep(15)
-                i = diskUsageControl()
+                logger.info('Script will sleep 45 seconds...CY-L ;)')
+                time.sleep(45)
+                i = diskUsageControl(logger, cfg)
             looger.info('Good enough for today ! Stop Dll, otherwise im gona delete everyting...')
             time.sleep(5)
             looger.info('rm -rf / ? ready... ?')
