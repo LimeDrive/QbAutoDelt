@@ -49,48 +49,25 @@ def diskusagecontrol():
 
 # Vas récupéré les torrent, leur hash, leur donné un score. pour retouné un dico.
 def scoretorrent():
-    min_SEEDTIME = cfg["t_statistique"]["min_SeedTime"]*60*60
+    min_time = cfg["t_statistique"]["min_SeedTime"]*60*60
     min_ratio = cfg["t_statistique"]["min_Ratio"]
-    tags_PRIO = cfg["t_tags"]["priority"]
-    tags_PREF = cfg["t_tags"]["prefer"]
-    tags_EXCLUD = cfg["t_tags"]["exclud"]
-    tags_STATE = cfg["t_tags"]["states"]
+    tgprio = cfg["t_tags"]["priority"]
+    tgpref = cfg["t_tags"]["prefer"]
+    tgex = cfg["t_tags"]["exclud"]
+    tgstate = cfg["t_tags"]["states"]
     data = dict()
-    for torrent in qbt.torrents_info():
-        # logger.debug(f'torrent api: {str(torrent)} ')
-        l_hash = torrent.hash
-        t_seed = torrent.seeding_time
-        # logger.debug(f'torrent.seeding_time : {str(t_seed)}')
-        if t_seed > min_SEEDTIME:
-            s_seed = round(100 + (t_seed - min_SEEDTIME) / 6000, 2)
-        else:
-            s_seed = -10000
-        t_ratio = torrent.ratio
-        if t_ratio < min_ratio:
-            s_ratio = -10000
-        else:
-            s_ratio = t_ratio * 100
-        t_tag = torrent.tags
-        if t_tag in tags_PRIO:
-            s_tag = 9999999
-        elif t_tag in tags_PREF:
-            s_tag = 100000
-        elif t_tag in tags_EXCLUD:
-            s_tag = -10000
-        else:
-            s_tag = 0
-        t_state = torrent.state
-        if t_state in tags_STATE:
-            s_state = -99999999999
-        else:
-            s_state = 0
-        s_score = s_ratio + s_seed + s_tag + s_state
-        data[l_hash] = s_score
-        # tname = torrent.name
-        # logger.debug( f"\n \
-        #     {tname} :\n \
-        #     Ratio: {str(t_ratio)}/={str(s_ratio)}   SeedTime: {str(t_seed)}/={str(s_seed)}   Tag: {t_tag}/={str(s_tag)}   State: {t_state}/={str(s_state)}\n \
-        #     Final Score: {str(s_score)}" )
+    for t in qbt.torrents_info():
+        s_seed = round(100 + (t.seeding_time - min_time) / 6000, 2) if t.seeding_time > min_time else -10000
+        s_ratio = -10000 if t.ratio < min_ratio else t.ratio * 100
+        s_tag = 9999999 if t.tags in tgprio else 100000 if t.tags in tgpref else -99999999999 if t.tags in tgex else 0
+        s_state = -99999999999 if t.state in tgstate else 0
+        t_score = s_ratio + s_seed + s_tag + s_state
+        data[t.hash] = t_score
+        tname = t.name
+        logger.debug( f"\n \
+            {tname} :\n \
+            Ratio: {str(t.ratio)}/={str(s_ratio)}   SeedTime: {str(t.seeding_time)}/={str(s_seed)}   Tag: {t.tags}/={str(s_tag)}   State: {t.state}/={str(s_state)}\n \
+            Final Score: {str(t_score)}" )
     logger.debug( "Dico data update, torrent scored : \n" + str(data) )
     return data
 
@@ -104,8 +81,8 @@ while True:
     disk_REAL = diskusagecontrol()
 
     if disk_P >= disk_REAL:
-        logger.info("...........Disk use at :  " + str(disk_REAL) + "% ..keep going.")
-        scoretorrent()
+        logger.info(f"Disk Space use at {str(disk_REAL)}% - Your allow to fill up {str(disk_P - disk_REAL)}% before deleting Script start runing")
+        # scoretorrent() # for testing
     else:
         data = scoretorrent()
         i = diskusagecontrol()
