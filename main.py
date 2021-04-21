@@ -12,7 +12,7 @@ import logging.config
 ####        Logging       #####
 ###############################
 
-logging.config.fileConfig('logging.conf')
+logging.config.fileConfig('config/logging.conf')
 logger = logging.getLogger(__name__)
 
 ###############################
@@ -57,10 +57,12 @@ def scoretorrent():
     tags_STATE = cfg["t_tags"]["states"]
     data = dict()
     for torrent in qbt.torrents_info():
+        # logger.debug(f'torrent api: {str(torrent)} ')
         l_hash = torrent.hash
-        l_seed = torrent.seeding_time
-        if l_seed > min_SEEDTIME:
-            s_seed = round(100 + (l_seed - min_SEEDTIME) / 6000, 2)
+        t_seed = torrent.seeding_time
+        # logger.debug(f'torrent.seeding_time : {str(t_seed)}')
+        if t_seed > min_SEEDTIME:
+            s_seed = round(100 + (t_seed - min_SEEDTIME) / 6000, 2)
         else:
             s_seed = -10000
         t_ratio = torrent.ratio
@@ -84,10 +86,13 @@ def scoretorrent():
             s_state = 0
         s_score = s_ratio + s_seed + s_tag + s_state
         data[l_hash] = s_score
-        #tname = torrent.name
-        #logger.debug(f"{tname} :\nRatio: {str(t_ratio)}/={str(s_ratio)}   SeedTime: {str(t_seed)}/={str(s_seed)} \
-        #      Tag: {t_tag}/={str(s_tag)}   State: {t_state}/={str(s_state)}\nFinale Scored: {str(s_score)}")
-    logger.info('Torrents fully scored...')
+        # tname = torrent.name
+        # logger.debug( f"\n \
+        #     {tname} :\n \
+        #     Ratio: {str(t_ratio)}/={str(s_ratio)}   SeedTime: {str(t_seed)}/={str(s_seed)}   Tag: {t_tag}/={str(s_tag)}   State: {t_state}/={str(s_state)}\n \
+        #     Final Score: {str(s_score)}" )
+    logger.info( 'Torrents fully scored...' )
+    # logger.debug( "Dico data update : " + str(data) )
     return data
 
 ###############################
@@ -101,6 +106,7 @@ while True:
 
     if disk_P >= disk_REAL:
         logger.info("...........Disk use at :  " + str(disk_REAL) + "% ..keep going.")
+        scoretorrent()
     else:
         data = scoretorrent()
         i = diskusagecontrol()
