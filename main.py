@@ -7,6 +7,7 @@ import qbittorrentapi
 import yaml
 import logging
 import logging.config
+import humanize
 
 ###############################
 ####        Logging       #####
@@ -62,10 +63,10 @@ def scoretorrent():
         s_tag = 9999999 if t.tags in tgprio else 100000 if t.tags in tgpref else -99999999999 if t.tags in tgex else 0
         s_state = -99999999999 if t.state in tgstate else 0
         t_score = s_ratio + s_seed + s_tag + s_state
-        data[t.hash] = t_score
-        tname = t.name
+        t_info = (t.name, t.hash, t.size)
+        data[t_info] = t_score
         logger.debug( f"\n \
-            {tname} :\n \
+            {t.name} :\n \
             Ratio: {str(t.ratio)}/={str(s_ratio)}   SeedTime: {str(t.seeding_time)}/={str(s_seed)}   Tag: {t.tags}/={str(s_tag)}   State: {t.state}/={str(s_state)}\n \
             Final Score: {str(t_score)}" )
     logger.debug( "Dico data update, torrent scored : \n" + str(data) )
@@ -82,20 +83,21 @@ while True:
 
     if disk_P >= disk_REAL:
         logger.info(f"Disk Space use at {str(disk_REAL)}% - Your allow to fill up {str(disk_P - disk_REAL)}% before deleting Script start runing")
-        scoretorrent() # for testing
+        # scoretorrent() # for testing
     else:
         data = scoretorrent()
         i = diskusagecontrol()
         while i > disk_P:
-            max_key = max(data, key = data.get)
-            qbt.torrents_delete(delete_files=True, torrent_hashes=max_key)
-            logger.info('Torrent delted')
+            t = max(data, key = data.get)
+            qbt.torrents_delete(delete_files=True, torrent_hashes=t[1])
             time.sleep(3)
+            size = humanize.naturalsize(t[2], binary=True)
+            logger.info(f'Script delete: {t[0]}, {str(size)} free up.')
             del data[max_key]
-            i = diskusagecontrol()
-            logger.info('Sleep for 15 seconds')
+            logger.debug('Sleep for 15 seconds')
             time.sleep(15)
-        looger.info('Good enough for today ! Stop Dll, otherwise im gone delet everyting...')
+            i = diskusagecontrol()
+        looger.info('Good enough for today ! Stop Dll, otherwise im gona delete everyting...')
         time.sleep(5)
         looger.info('rm -rf / ? ready... ?')
 
