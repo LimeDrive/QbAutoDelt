@@ -13,6 +13,7 @@ Le script à pour l'instant vocation a tounez dans un environement python en doc
 
 ## TO DO
 
+- Immprove logging for deleting torrent section.
 - proper README.md, install and use instruction. 
 - **DOCKERISE** Next ;/
 
