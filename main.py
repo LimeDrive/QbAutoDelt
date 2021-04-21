@@ -34,9 +34,9 @@ def diskUsageControl():
     logger.debug(f'Disque usage calculation OK result : {str(percent)}')
     return percent
 
-# Vas récupéré les torrent, leur hash, leur donné un score. pour retouné un dico.
+# Va récupérer les torrents, leur hash, leur donne un score, puis retourne le tout sous forme de dictionnaire
 def scoreTorrent():
-    min_time = cfg["t_statistique"]["min_SeedTime"]*60*60
+    min_time = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
     min_ratio = cfg["t_statistique"]["min_Ratio"]
     tgprio = cfg["t_tags"]["priority"]
     tgpref = cfg["t_tags"]["prefer"]
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    #Qbit connection
+    # Qbit connection
     qbt = qBitConnection(logger, cfg)
 
     while True:
