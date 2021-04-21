@@ -363,3 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 
 .DS_Store
+
+#Pycharm environment
+venv/
+.idea/

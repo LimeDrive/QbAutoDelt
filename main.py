@@ -9,48 +9,33 @@ import logging
 import logging.config
 import humanize
 
-###############################
-####        Logging       #####
-###############################
+def qBitConnection(logger, cfg):
+    qbt = qbittorrentapi.Client(host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_log"]["qbt_user"],
+                                password=cfg["qbt_log"]["qbt_pass"])
+    try:
+        qbt.auth_log_in()
+    except qbittorrentapi.LoginFailed as e:
+        logger.warning(f'Conection with qBittorrent and Web Api failed: \n{e}')
+    logger.info(f'Conection with qBittorrent tested OK : {qbt.app.version}')
+    logger.info(f'Conection with qBt Web Api tested OK : {qbt.app.web_api_version}')
+    return qbt
 
-logging.config.fileConfig('config/logging.conf')
-logger = logging.getLogger(__name__)
-
-###############################
-####    Variable Global   #####
-###############################
-
-## Import from Yaml config/qb-auto-delt.config.yml
-with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
-    cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-
-
-###############################
-####    Conection API     #####
-###############################
-
-qbt = qbittorrentapi.Client(host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_log"]["qbt_user"], password=cfg["qbt_log"]["qbt_pass"])
-try:
-    qbt.auth_log_in()
-except qbittorrentapi.LoginFailed as e:
-    logger.warning(f'Conection with qBittorrent and Web Api failed: \n{e}')
-logger.info(f'Conection with qBittorrent tested OK : {qbt.app.version}')
-logger.info(f'Conection with qBt Web Api tested OK : {qbt.app.web_api_version}')
 
 ###############################
 ####      Fonction        #####
 ###############################
 
-# % disque usage ./ comme path sur mac a l'air ok, a voir sur linux, PATH a mettre dans une variable
-def diskusagecontrol():
+#Retourne le pourcentage d'utilisation du disque dur à l'endroit ./
+def diskUsageControl():
     stat = psutil.disk_usage(cfg["disk"]["PATH"])
     percent = round(stat.percent)
     logger.debug(f'Disque usage calculation OK result : {str(percent)}')
     return percent
 
-# Vas récupéré les torrent, leur hash, leur donné un score. pour retouné un dico.
-def scoretorrent():
-    min_time = cfg["t_statistique"]["min_SeedTime"]*60*60
+
+# Va récupérer les torrents, leur hash, leur donne un score, puis retourne le tout sous forme de dictionnaire
+def scoreTorrent():
+    min_time = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
     min_ratio = cfg["t_statistique"]["min_Ratio"]
     tgprio = cfg["t_tags"]["priority"]
     tgpref = cfg["t_tags"]["prefer"]
@@ -72,37 +57,45 @@ def scoretorrent():
     logger.debug( "Data update, torrent scored : \n" + str(data) )
     return data
 
+
 ###############################
 ####        Script        #####
 ###############################
+if __name__ == '__main__':
+    logging.config.fileConfig('config/logging.conf')
+    logger = logging.getLogger(__name__)
 
-while True:
+    ## Import from Yaml config/qb-auto-delt.config.yml
+    with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    disk_P = cfg["disk"]["MAX"]
-    disk_REAL = diskusagecontrol()
+    #Qbit connection
+    qbt = qBitConnection(logger, cfg)
 
-    if disk_P >= disk_REAL:
-        logger.info(f"Disk Space use at {str(disk_REAL)}% - Your allow to fill up {str(disk_P - disk_REAL)}% before deleting script process")
-        # scoretorrent() # for testing
-    else:
-        data = scoretorrent()
-        i = diskusagecontrol()
-        logger.info(f"Disk Space use at {str(disk_REAL)}% -  Over than {str(disk_REAL - disk_P)}%, deleting script start")
-        while i > disk_P:
-            t = max(data, key = data.get)
-            qbt.torrents_delete(delete_files=True, torrent_hashes=t[1])
-            time.sleep(3)
-            size = humanize.naturalsize(t[2], binary=True)
-            logger.info(f'Script delete: {t[0]}, {str(size)} free up.')
-            del data[max_key]
-            logger.debug('Sleep for 15 seconds')
-            time.sleep(15)
-            i = diskusagecontrol()
-        looger.info('Good enough for today ! Stop Dll, otherwise im gona delete everyting...')
-        time.sleep(5)
-        looger.info('rm -rf / ? ready... ?')
+    while True:
+        disk_P = cfg["disk"]["MAX"]
+        disk_REAL = diskUsageControl()
+        if disk_P >= disk_REAL:
+            logger.info(
+                f"Disk Space use at {str(disk_REAL)}% - Your allow to fill up {str(disk_P - disk_REAL)}% before deleting Script start runing")
+            scoreTorrent()  # for testing
+        else:
+            data = scoreTorrent()
+            i = diskUsageControl()
+            while i > disk_P:
+                max_key = max(data, key=data.get)
+                qbt.torrents_delete(delete_files=True, torrent_hashes=max_key)
+                logger.info('Torrent delted')
+                time.sleep(3)
+                del data[max_key]
+                i = diskUsageControl()
+                logger.info('Sleep for 15 seconds')
+                time.sleep(15)
+            logger.info('Good enough for today ! Stop Dll, otherwise im gone delet everyting...')
+            time.sleep(5)
+            logger.info('rm -rf / ? ready... ?')
 
-    inter = cfg["interval"] * 60
-    logger.info(f"Script will recheck your disk space in - {str(inter)} - seconds")
-    time.sleep(inter)
-    logger.debug('Script restart')
+        inter = cfg["interval"] * 60
+        logger.info(f"Script will recheck your disk space in - {str(inter)} - seconds")
+        time.sleep(inter)
+        logger.debug('Script restart')
