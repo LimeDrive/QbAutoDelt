@@ -1,25 +1,28 @@
 ---
 ## Identifiant pour la webUI de qBittorrent :
+
 qbt_log:
   qbt_host: "localhost:8080"
   qbt_user: "admin"
   qbt_pass: "adminadmin"
 
-## Pourcentage d'espace disk qui déclanche la suppretion des torrents :
+## Pourcentage d'espace disque qui déclenche la suppression des torrents :
+
 disk:
   MAX: 80
   PATH: './'
 
-## Intervale entre les exécution du programme en minute
+## Intervalle entre les exécutions du programme en minute
+
 interval: 10
 
-## Paramétre pour le trie et la séléction des torrents a supprimé en priorité :
+## Paramètres pour le tri et la sélection des torrents à supprimer en priorité :
 
 t_statistique:
-  min_SeedTime: 80 # A exprimé en heurs
+  min_SeedTime: 80 # A exprimer en heures
   min_Ratio: 0 # Ratio O = null
 
-# Les Tags aka étiquette (dans qb) qui permettrons de faire passé un torrent en priorité, de le favorisé ou de l'exlure.
+# Les Tags aka étiquette (dans qBt) qui permettrons de faire passer un torrent en priorité, de le favoriser ou de l'exlure.
 
 t_tags:
   priority:

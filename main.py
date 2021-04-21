@@ -58,12 +58,12 @@ def scoreTorrent():
     logger.debug( "Data update, torrent scored : \n" + str(data) )
     return data
 
+
 ###############################
 ####        Script        #####
 ###############################
 
 if __name__ == '__main__':
-
     logging.config.fileConfig('config/logging.conf')
     logger = logging.getLogger(__name__)
 
@@ -99,8 +99,6 @@ if __name__ == '__main__':
             looger.info('Good enough for today ! Stop Dll, otherwise im gona delete everyting...')
             time.sleep(5)
             looger.info('rm -rf / ? ready... ?')
-
-        inter = cfg["interval"] * 60
-        logger.info(f"Script will recheck your disk space in - {str(inter)} - seconds")
+        logger.info(f"Script will recheck your disk space in - {str(cfg["interval"] * 60)} - seconds")
         time.sleep(inter)
         logger.debug('Script restart')
