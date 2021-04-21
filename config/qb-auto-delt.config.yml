@@ -6,11 +6,28 @@ qbt_log:
   qbt_user: "admin"
   qbt_pass: "adminadmin"
 
-## Pourcentage d'espace disque qui déclenche la suppression des torrents :
+##
+##    /!\ Configuration de la méthode de controle de l'espace disque et déclanchement de la suppréssion /!\
+##    /!\ Seul True n'est disponible si vous utilisé ce script pour une instance distante (ex: Seedbox) /!\
+##
+##    True = Déclanchement de la suppréssion quand il ne reste que xx GiB d'espace libre sur votre disque
+##    False = Déclanchement de la suppréssion quand vous dépassé XX % d'espace disque
+##
 
-disk:
-  MAX: 80
-  PATH: './'
+ControlMethode: True # True or False
+
+## Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveillé. 
+## Si ControlMethode = False
+
+diskUsageByPercent:
+  max: 80
+  path: './'
+
+## Qantité d'espace disque restante exprimé en GiB qui déclenche la suppression des torrents.
+## Si ControlMethode = True
+
+diskUsageByGiB:
+  val: 100
 
 ## Intervalle entre les exécutions du programme en minute
 
