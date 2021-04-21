@@ -45,7 +45,7 @@ logger.info(f'Conection with qBt Web Api tested OK : {qbt.app.web_api_version}')
 def diskusagecontrol():
     stat = psutil.disk_usage(cfg["disk"]["PATH"])
     percent = round(stat.percent)
-    logger.debug('Disque usage calculation OK')
+    logger.debug(f'Disque usage calculation OK result : {str(percent)}')
     return percent
 
 # Vas récupéré les torrent, leur hash, leur donné un score. pour retouné un dico.
@@ -82,11 +82,12 @@ while True:
     disk_REAL = diskusagecontrol()
 
     if disk_P >= disk_REAL:
-        logger.info(f"Disk Space use at {str(disk_REAL)}% - Your allow to fill up {str(disk_P - disk_REAL)}% before deleting Script start runing")
+        logger.info(f"Disk Space use at {str(disk_REAL)}% - Your allow to fill up {str(disk_P - disk_REAL)}% before deleting script process")
         # scoretorrent() # for testing
     else:
         data = scoretorrent()
         i = diskusagecontrol()
+        logger.info(f"Disk Space use at {str(disk_REAL)}% -  Over than {str(disk_REAL - disk_P)}%, deleting script start")
         while i > disk_P:
             t = max(data, key = data.get)
             qbt.torrents_delete(delete_files=True, torrent_hashes=t[1])

@@ -27,10 +27,12 @@ By default, logging lvl are up to `INFO` for the console and up to `DEBUG` in th
 
 - **INFO** console log exemple :
 ```log
-INFO  ::  2021-04-21 12:31:37,321 - __main__ - Conection with qBittorrent tested OK : v4.3.4.1
-INFO  ::  2021-04-21 12:31:37,326 - __main__ - Conection with qBt Web Api tested OK : 2.8.1
-INFO  ::  2021-04-21 12:31:37,326 - __main__ - Disk Space use at 33% - Your allow to fill up 47% before deleting Script start runing
-INFO  ::  2021-04-21 12:31:37,333 - __main__ - Script will recheck your disk space in - 600 - seconds
+INFO  ::  2021-04-21 xx:xx:xx,xxx - __main__ - Conection with qBittorrent tested OK : v4.3.4.1
+INFO  ::  2021-04-21 xx:xx:xx,xxx - __main__ - Conection with qBt Web Api tested OK : 2.8.1
+INFO  ::  2021-04-21 xx:xx:xx,xxx - __main__ - Disk Space use at 33% - Your allow to fill up 47% before deleting Script start runing
+INFO  ::  2021-04-21 xx:xx:xx,xxx - __main__ - Script will recheck your disk space in - 600 - seconds
+INFO  ::  2021-04-21 xx:xx:xx,xxx - __main__ - Disk Space use at 84% -  Over -04%, deleting script start.
+INFO  ::  2021-04-21 xx:xx:xx,xxx - __main__ - Script delete: covid19_vestiaires_v050520.pdf, 459.6 KiB free up.
 ```
 
 - **DEBUG** logs in `qb-auto-delt.log` exemple :
