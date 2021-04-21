@@ -8,6 +8,7 @@ import yaml
 import logging
 import logging.config
 import humanize
+import os
 
 ###############################
 ####    Conection API     #####
@@ -38,7 +39,7 @@ def diskUsageControl(logger, cfg):
         if ctrlDisk is True:
             logger.info(f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} -  Over than {str(limit - free)} GiB, deleting script start")
         else:
-            logger.info(f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {str(free - limit)} % before deleting script process")
+            logger.info(f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {str(free - limit)} GiB before deleting script process")
     else:
         logger.debug("Control method : diskUsageByPercent select")
         stat = psutil.disk_usage(cfg["diskUsageByPercent"]["path"])
@@ -81,10 +82,19 @@ def scoreTorrent(cfg, qbt):
 ###############################
 
 if __name__ == '__main__':
+
+    # Logging
+    logdir = 'log'
+    if not os.path.exists(logdir):
+        os.mkdir(logdir)
+        print("Directory " , logdir ,  " Created ")
+    else:    
+        print("Directory " , logdir ,  " already exists")
+
     logging.config.fileConfig('config/logging.conf')
     logger = logging.getLogger(__name__)
 
-    ## Import from Yaml config/qb-auto-delt.config.yml
+    # Import from Yaml config/qb-auto-delt.config.yml
     with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
@@ -94,9 +104,9 @@ if __name__ == '__main__':
 
     while True:
 
-        ctrl = diskUsageControl(logger, cfg)
-        scoreTorrent(cfg, qbt)
-        if ctrl:
+        # ctrl = diskUsageControl(logger, cfg)
+        scoreTorrent(cfg, qbt) # for test
+        if diskUsageControl(logger, cfg):
             data = scoreTorrent(cfg, qbt)
             i = diskUsageControl(logger, cfg)
             while i is True:
