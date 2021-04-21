@@ -23,7 +23,7 @@ diskUsageByPercent:
   max: 80
   path: './'
 
-## Qantité d'espace disque restante qui déclenche la suppression des torrents.
+## Qantité d'espace disque restante exprimé en GiB qui déclenche la suppression des torrents.
 ## Si ControlMethode = True
 
 diskUsageByGiB:

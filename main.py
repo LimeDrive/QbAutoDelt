@@ -2,7 +2,6 @@
 
 import psutil
 import time
-from time import ctime
 import operator
 import qbittorrentapi
 import yaml
@@ -30,8 +29,7 @@ def qBitConnection(logger, cfg):
 ###############################
 
 def diskUsageControl(logger, cfg):
-    mtd = cfg["ControlMethode"]
-    if mtd:
+    if cfg["ControlMethode"]:
         logger.debug("Control method : diskUsageByGiB select")
         limit = cfg["diskUsageByGiB"]["val"]
         i = qbt.sync.maindata.delta()
@@ -85,14 +83,7 @@ def scoreTorrent(cfg, qbt):
 if __name__ == '__main__':
 
     # Logging
-    logdir = 'log'
-    tp = ctime()
-    if not os.path.exists(logdir):
-        os.mkdir(logdir)
-        print(f'INFO  ::  {tp}  :   Directory , {logdir} ,  Created')
-    else:    
-        print(f'INFO  ::  {tp}  :   Directory , {logdir} ,  already exists')
-
+    os.makedirs("log", exist_ok=True)
     logging.config.fileConfig('config/logging.conf')
     logger = logging.getLogger(__name__)
 
@@ -105,9 +96,7 @@ if __name__ == '__main__':
 
 
     while True:
-
-        # ctrl = diskUsageControl(logger, cfg)
-        scoreTorrent(cfg, qbt) # for test
+        #scoreTorrent(cfg, qbt) # for test
         if diskUsageControl(logger, cfg):
             data = scoreTorrent(cfg, qbt)
             i = diskUsageControl(logger, cfg)
