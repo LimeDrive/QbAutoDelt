@@ -71,7 +71,7 @@ if __name__ == '__main__':
     with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    # Qbit connection
+    # Try to establish Qbittorrent connection
     qbt = qBitConnection(logger, cfg)
 
     while True:
