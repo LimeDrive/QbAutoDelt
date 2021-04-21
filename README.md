@@ -18,16 +18,34 @@ Le script à pour l'instant vocation a tounez dans un environement python en doc
 
 NO instant msg plan for the moment,... could be send by torrent client already, and usless with this app due the logs.
 
-### Improve logs : done. 
-- consol log lvl Info
-- log file lvl DEBUG, exemple : 
+## Logging :
 
+Logging info show in console
+File log name `qb-auto-delt.log` are also created from scratch at start of the app in `./log` directory.
+By default, logging lvl are up to `INFO` for the console and up to `DEBUG` in the log file.
+
+- **INFO** console log exemple :
+```log
+INFO  ::  2021-04-21 12:31:37,321 - __main__ - Conection with qBittorrent tested OK : v4.3.4.1
+INFO  ::  2021-04-21 12:31:37,326 - __main__ - Conection with qBt Web Api tested OK : 2.8.1
+INFO  ::  2021-04-21 12:31:37,326 - __main__ - Disk Space use at 33% - Your allow to fill up 47% before deleting Script start runing
+INFO  ::  2021-04-21 12:31:37,333 - __main__ - Script will recheck your disk space in - 600 - seconds
 ```
-INFO  ::  2021-04-20 15:04:21,904 - __main__ - Conection with qBittorrent tested OK : version:  v4.3.4.1
-INFO  ::  2021-04-20 15:04:21,909 - __main__ - Conection with qBt Web Api tested OK : version:  2.8.1
-DEBUG  ::  2021-04-20 15:04:21,909 - __main__ - Disque usage calculation done.
-INFO  ::  2021-04-20 15:04:21,909 - __main__ - ...........Disk use at :  32% ..keep going.
-INFO  ::  2021-04-20 15:04:21,909 - __main__ - Start interval of - 600 - seconds
+
+- **DEBUG** logs in `qb-auto-delt.log` exemple :
+
+```log
+INFO  ::  2021-04-21 12:31:37,321 - __main__ - Conection with qBittorrent tested OK : v4.3.4.1
+INFO  ::  2021-04-21 12:31:37,326 - __main__ - Conection with qBt Web Api tested OK : 2.8.1
+DEBUG  ::  2021-04-21 12:31:37,326 - __main__ - Disque usage calculation OK
+INFO  ::  2021-04-21 12:31:37,326 - __main__ - Disk Space use at 33% - Your allow to fill up 47% before deleting Script start runing
+DEBUG  ::  2021-04-21 12:31:37,333 - __main__ - 
+             covid19_vestiaires_v050520.pdf :
+             Ratio: 0/=0   SeedTime: 2730/=-10000   Tag: PUBLIC/=9999999   State: stalledUP/=0
+             Final Score: 9989999
+DEBUG  ::  2021-04-21 12:31:37,333 - __main__ - Dico data update, torrent scored : 
+{'1b00dcebb138fe69230aad0c3c3d34c4964d1d80': 9989999}
+INFO  ::  2021-04-21 12:31:37,333 - __main__ - Script will recheck your disk space in - 600 - seconds
 ```
 ### Note : Exemple de retour api :
 

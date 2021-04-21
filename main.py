@@ -33,8 +33,8 @@ try:
     qbt.auth_log_in()
 except qbittorrentapi.LoginFailed as e:
     logger.warning(f'Conection with qBittorrent and Web Api failed: \n{e}')
-logger.info(f'Conection with qBittorrent tested OK : version:  {qbt.app.version}')
-logger.info(f'Conection with qBt Web Api tested OK : version:  {qbt.app.web_api_version}')
+logger.info(f'Conection with qBittorrent tested OK : {qbt.app.version}')
+logger.info(f'Conection with qBt Web Api tested OK : {qbt.app.web_api_version}')
 
 ###############################
 ####      Fonction        #####
@@ -82,7 +82,7 @@ while True:
 
     if disk_P >= disk_REAL:
         logger.info(f"Disk Space use at {str(disk_REAL)}% - Your allow to fill up {str(disk_P - disk_REAL)}% before deleting Script start runing")
-        # scoretorrent() # for testing
+        scoretorrent() # for testing
     else:
         data = scoretorrent()
         i = diskusagecontrol()
@@ -100,6 +100,6 @@ while True:
         looger.info('rm -rf / ? ready... ?')
 
     inter = cfg["interval"] * 60
-    logger.info(f"Start interval of - {str(inter)} - seconds")
+    logger.info(f"Script will recheck your disk space in - {str(inter)} - seconds")
     time.sleep(inter)
     logger.debug('Script restart')
