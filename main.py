@@ -99,6 +99,7 @@ if __name__ == '__main__':
             looger.info('Good enough for today ! Stop Dll, otherwise im gona delete everyting...')
             time.sleep(5)
             looger.info('rm -rf / ? ready... ?')
-        logger.info(f"Script will recheck your disk space in - {str(cfg["interval"] * 60)} - seconds")
+        inter = cfg["interval"] * 60
+        logger.info(f"Script will recheck your disk space in - {str(inter)} - seconds")
         time.sleep(inter)
         logger.debug('Script restart')
