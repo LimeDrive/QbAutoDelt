@@ -2,6 +2,7 @@
 
 import psutil
 import time
+from time import ctime
 import operator
 import qbittorrentapi
 import yaml
@@ -85,11 +86,12 @@ if __name__ == '__main__':
 
     # Logging
     logdir = 'log'
+    tp = ctime()
     if not os.path.exists(logdir):
         os.mkdir(logdir)
-        print("Directory " , logdir ,  " Created ")
+        print(f'INFO  ::  {tp}  :   Directory , {logdir} ,  Created')
     else:    
-        print("Directory " , logdir ,  " already exists")
+        print(f'INFO  ::  {tp}  :   Directory , {logdir} ,  already exists')
 
     logging.config.fileConfig('config/logging.conf')
     logger = logging.getLogger(__name__)
