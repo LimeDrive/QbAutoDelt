@@ -69,7 +69,7 @@ def scoretorrent():
             {t.name} :\n \
             Ratio: {str(t.ratio)}/={str(s_ratio)}   SeedTime: {str(t.seeding_time)}/={str(s_seed)}   Tag: {t.tags}/={str(s_tag)}   State: {t.state}/={str(s_state)}\n \
             Final Score: {str(t_score)}" )
-    logger.debug( "Dico data update, torrent scored : \n" + str(data) )
+    logger.debug( "Data update, torrent scored : \n" + str(data) )
     return data
 
 ###############################
