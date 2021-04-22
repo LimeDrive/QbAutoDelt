@@ -1,5 +1,7 @@
 certifi==2020.12.5
 chardet==4.0.0
+discord-webhook==0.11.0
+discordwebhook==1.0.2
 humanize==3.4.1
 idna==2.10
 logging==0.4.9.6
@@ -9,4 +11,5 @@ PyYAML==5.4.1
 qbittorrent-api==2021.4.20
 requests==2.25.1
 six==1.15.0
+tenacity==7.0.0
 urllib3==1.26.4

@@ -27,7 +27,11 @@ diskUsageByPercent:
 ## Si ControlMethode = True
 
 diskUsageByGiB:
-  val: 100
+  val: 150
+
+## Safe mode: Mode de sécurité, prompt l'utilisateur pour une confirmation de suppression du torrent.
+
+safe: True
 
 ## Intervalle entre les exécutions du programme en minute
 
@@ -39,7 +43,7 @@ t_statistique:
   min_SeedTime: 80 # A exprimer en heures
   min_Ratio: 0 # Ratio O = null
 
-# Les Tags aka étiquette (dans qBt) qui permettrons de faire passer un torrent en priorité, de le favoriser ou de l'exlure.
+## Les Tags aka étiquette (dans qBt) qui permettrons de faire passer un torrent en priorité, de le favoriser ou de l'exlure.
 
 t_tags:
   priority:
@@ -58,3 +62,9 @@ t_tags:
     - "downloading"
     - "metaDL"
     - "moving"
+
+## Discord, droit etre activé avec True et l'url du webhook pour les notification :
+
+discord:
+  use: True # True = Yes, False = Non
+  webhook: "https://discord.com/api/webhooks/834590737935892500/Hq0KEvTzYJcU58VamGynQtfURoSVCZ3BfyVV2bnVn7Ui-xbIISpExmpKOH5DPMPo42-5"

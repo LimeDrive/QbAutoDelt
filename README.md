@@ -24,17 +24,13 @@ The script is for the moment intended to run in a dockerized python environment.
 
 ## TO DO
 
-- Améliorer les logs lors de la suppression de torrents
 - Rédiger un WIKI d'installation et d'utilisation propre. 
 - **DOCKERISATION**
 
 Pas de liaisons avec une messagerie instantanée ou un service mail pour le moment, Cela pouvant déjà être géré par qBittorrent.
 
-- Improve logs when deleting torrents
 - Write a WIKI for clean installation and use. 
-- DOCKERIZATION**
-
-No link with an instant messenger or a mail service for the moment, this can already be managed by qBittorrent.
+- **DOCKERIZATION**
 
 ## Logging :
 Logging info show in console
@@ -68,20 +64,3 @@ DEBUG  ::  2021-04-21 12:31:37,333 - __main__ - Dico data update, torrent scored
 {'1b00dcebb138fe69230aad0c3c3d34c4964d1d80': 9989999}
 INFO  ::  2021-04-21 12:31:37,333 - __main__ - Script will recheck your disk space in - 600 - seconds
 ```
-
-
-### Note : Exemple de retour api :
-
-```DEBUG  ::  2021-04-21 10:29:16,830 - __main__ - torrent api: AttrDict({'added_on': 1618992220, 'amount_left': 0, 'auto_tmm': False, 'availability': -1, 'category': '', 'completed': 470667, 'completion_on': 1618992220, 'content_path': '/Users/user/Documents/covid19/covid19_vestiaires_v050520.pdf', 'dl_limit': -1, 'dlspeed': 0, 'downloaded': 0, 'downloaded_session': 0, 'eta': 8640000, 'f_l_piece_prio': False, 'force_start': True, 'hash': '1b00dcebb138fe69230aad0c3c3d34c4964d1d80', 'last_activity': 1618993757, 'magnet_uri': 'magnet:?xt=urn:btih:1b00dcebb138fe69230aad0c3c3d34c4964d1d80&dn=covid19_vestiaires_v050520.pdf', 'max_ratio': -1, 'max_seeding_time': -1, 'name': 'covid19_vestiaires_v050520.pdf', 'num_complete': 0, 'num_incomplete': 0, 'num_leechs': 0, 'num_seeds': 0, 'priority': 0, 'progress': 1, 'ratio': 0, 'ratio_limit': -2, 'save_path': '/Users/user/Documents/covid19/', 'seeding_time': 1254, 'seeding_time_limit': -2, 'seen_complete': -3600, 'seq_dl': False, 'size': 470667, 'state': 'forcedUP', 'super_seeding': False, 'tags': '', 'time_active': 1254, 'total_size': 470667, 'tracker': '', 'trackers_count': 0, 'up_limit': -1, 'uploaded': 0, 'uploaded_session': 0, 'upspeed': 0}) ```
-
-
-
-
-Le `seeding_time': 1254` n'a pas l'air au point, ça ne se met pas a jour certaines fois sur les tests, et ça vient de qBittorrent
-Peut être utiliser `completion_on': 1618992220` et faire une fonction de calcul.
-A voir lors des tests...
-
-
-The `seeding_time': 1254` doesn't look right, it doesn't update sometimes on tests, and it's from qBittorrent
-Maybe use `completion_on': 1618992220` and make a calculation function.
-To be seen on tests...
