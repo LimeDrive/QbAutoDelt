@@ -1,14 +1,9 @@
 #!/usr/bin/env python3
 
-import psutil
-import time
-import operator
+import psutil, time, operator, yaml, os, humanize
 import qbittorrentapi
-import yaml
-import logging
-import logging.config
-import humanize
-import os
+import logging, logging.config
+from discordwebhook import Discord
 
 ###############################
 ####    Conection API     #####
@@ -37,6 +32,7 @@ def diskUsageControl(logger, cfg):
         ctrlDisk = True if limit > free else False
         if ctrlDisk is True:
             logger.info(f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} -  Over than {str(limit - free)} GiB, deleting script start")
+            discord.post(content=f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} -  Over than {str(limit - free)} GiB, deleting script start")
         else:
             logger.info(f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {str(free - limit)} GiB before deleting script process")
     else:
@@ -47,6 +43,7 @@ def diskUsageControl(logger, cfg):
         ctrlDisk = True if percent > limit else False
         if ctrlDisk is True:
             logger.info(f"Disk Space use at {str(percent)}% -  Over than {str(percent - limit)} %, deleting script start")
+            discord.post(content=f"Disk Space use at {str(percent)}% -  Over than {str(percent - limit)} %, deleting script start")
         else:
             logger.info(f"Disk Space use at {str(percent)}% - Your allow to fill up {str(limit - percent)} % before deleting script process")
     return ctrlDisk
@@ -82,14 +79,17 @@ def scoreTorrent(cfg, qbt):
 
 if __name__ == '__main__':
 
-    # Logging
+    # Import from Yaml config/qb-auto-delt.config.yml
+    with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+
+    # Logging Consol + File
     os.makedirs("log", exist_ok=True)
     logging.config.fileConfig('config/logging.conf')
     logger = logging.getLogger(__name__)
 
-    # Import from Yaml config/qb-auto-delt.config.yml
-    with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
-        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+    # Discord notify
+    discord = Discord(url=cfg["discord"]["webhook"])
 
     # Try to establish Qbittorrent connection
     qbt = qBitConnection(logger, cfg)
@@ -106,6 +106,7 @@ if __name__ == '__main__':
                 time.sleep(3)
                 size = humanize.naturalsize(t[2], binary=True)
                 logger.info(f'Script delete: {t[0]}, {str(size)} free up.')
+                discord.post(content=f'Torrent delete: {t[0]}, {str(size)} free up.')
                 del data[max_key]
                 logger.info('Script will sleep 45 seconds...CY-L ;)')
                 time.sleep(45)

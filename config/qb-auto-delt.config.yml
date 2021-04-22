@@ -39,7 +39,7 @@ t_statistique:
   min_SeedTime: 80 # A exprimer en heures
   min_Ratio: 0 # Ratio O = null
 
-# Les Tags aka étiquette (dans qBt) qui permettrons de faire passer un torrent en priorité, de le favoriser ou de l'exlure.
+## Les Tags aka étiquette (dans qBt) qui permettrons de faire passer un torrent en priorité, de le favoriser ou de l'exlure.
 
 t_tags:
   priority:
@@ -58,3 +58,8 @@ t_tags:
     - "downloading"
     - "metaDL"
     - "moving"
+
+## Discord :
+
+discord:
+  webhook: "https://discord.com/api/webhooks/834590737935892500/Hq0KEvTzYJcU58VamGynQtfURoSVCZ3BfyVV2bnVn7Ui-xbIISpExmpKOH5DPMPo42-5"

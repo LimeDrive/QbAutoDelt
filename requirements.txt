@@ -1,5 +1,7 @@
 certifi==2020.12.5
 chardet==4.0.0
+discord-webhook==0.11.0
+discordwebhook==1.0.2
 humanize==3.4.1
 idna==2.10
 logging==0.4.9.6
