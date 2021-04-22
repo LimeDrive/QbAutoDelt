@@ -27,7 +27,7 @@ def qBitConnection(logger, cfg):
         raise
     return qbt
 
-def diskUsageControl(logger, cfg, discord):
+def diskUsageControl():
     if cfg["ControlMethode"]:
         time.sleep(60)
         logger.debug("Control method : diskUsageByGiB select")
@@ -37,7 +37,8 @@ def diskUsageControl(logger, cfg, discord):
         ctrlDisk = True if limit > free else False
         if ctrlDisk is True:
             logger.info(f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} -  Over than {str(limit - free)} GiB, deleting script start")
-            discord.post(content=f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} -  Over than {str(limit - free)} GiB, deleting script start")
+            if useDiscord:
+                discord.post(content=f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} -  Over than {str(limit - free)} GiB, deleting script start", embeds=emb1, username="Qbittorrent")
         else:
             logger.info(f"Disk Space at {humanize.naturalsize(i.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {str(free - limit)} GiB before deleting script process")
     else:
@@ -48,7 +49,8 @@ def diskUsageControl(logger, cfg, discord):
         ctrlDisk = True if percent > limit else False
         if ctrlDisk is True:
             logger.info(f"Disk Space use at {str(percent)}% -  Over than {str(percent - limit)} %, deleting script start")
-            discord.post(content=f"Disk Space use at {str(percent)}% -  Over than {str(percent - limit)} %, deleting script start")
+            if useDiscord: 
+                discord.post(content=f"Disk Space use at {str(percent)}% -  Over than {str(percent - limit)} %, deleting script start", embeds=emb1, username="Qbittorrent")
         else:
             logger.info(f"Disk Space use at {str(percent)}% - Your allow to fill up {str(limit - percent)} % before deleting script process")
     return ctrlDisk
@@ -104,11 +106,13 @@ def removeSelectTorrent(aprouve, t, qbt):
         qbt.torrents_delete(delete_files=True, torrent_hashes=t[1])
         time.sleep(3)
         logger.info(f'Script delete: {t[0]}, {str(size)} free up.')
-        discord.post(content=f'Torrent delete: {t[0]}, {str(size)} free up.')
+        if useDiscord:
+            discord.post(content=f'Torrent delete: {t[0]}, {str(size)} free up.', embeds=emb2, username="Qbittorrent")
     else:
         logger.debug(f'Value of isTrue are : {aprouve}')
         logger.info(f"You don't approve my choise so... Scipt will Exit in 20 seconds")
-        discord.post(content=f"You don't approve my choise so... Scipt will Exit in 5 seconds")
+        if useDiscord:
+            discord.post(content=f"You don't approve my choise so... Scipt will Exit in 5 seconds", embeds=emb2, username="Qbittorrent")
         time.sleep(5)
         sys.exit('INFO.....exit by user choise. CyU :(')
 
@@ -124,16 +128,19 @@ if __name__ == '__main__':
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
     # Discord notify
+    useDiscord = cfg["discord"]["use"]
     discord = Discord(url=cfg["discord"]["webhook"])
+    emb1 = [{"url": "https://github.com/LimeDrive/qb-auto-delt", "title": "Qb-auto-delt", "description": "Disk space Control Notification"}]
+    emb2 = [{"url": "https://github.com/LimeDrive/qb-auto-delt", "title": "Qb-auto-delt", "description": "Torrents was remove from Your Serve"}]
 
     # Try to establish Qbittorrent connection
     qbt = qBitConnection(logger, cfg)
 
     while True:
         #scoreTorrent(cfg, qbt) # for test
-        if diskUsageControl(logger, cfg, discord):
+        if diskUsageControl():
             data = scoreTorrent(cfg, qbt)
-            i = diskUsageControl(logger, cfg, discord)
+            i = diskUsageControl()
             while i is True:
                 t = max(data, key = data.get)
                 size = humanize.naturalsize(t[2], binary=True)
@@ -144,7 +151,7 @@ if __name__ == '__main__':
                     removeSelectTorrent(answer, t, qbt)
                 else:
                     removeSelectTorrent(True, t, qbt)
-                i = diskUsageControl(logger, cfg, discord)
+                i = diskUsageControl()
             looger.info('Good enough for today ! Stop Dll, otherwise im gona delete everyting...')
             looger.info('rm -rf / ? ready... ?')
         inter = cfg["interval"] * 60

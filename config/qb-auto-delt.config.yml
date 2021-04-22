@@ -63,7 +63,8 @@ t_tags:
     - "metaDL"
     - "moving"
 
-## Discord :
+## Discord, droit etre activé avec True et l'url du webhook pour les notification :
 
 discord:
+  use: True # True = Yes, False = Non
   webhook: "https://discord.com/api/webhooks/834590737935892500/Hq0KEvTzYJcU58VamGynQtfURoSVCZ3BfyVV2bnVn7Ui-xbIISpExmpKOH5DPMPo42-5"
