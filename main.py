@@ -29,9 +29,9 @@ def qBitConnection(logger, cfg):
 
 def diskUsageControl(logger, cfg, discord):
     if cfg["ControlMethode"]:
+        time.sleep(60)
         logger.debug("Control method : diskUsageByGiB select")
         limit = cfg["diskUsageByGiB"]["val"]
-        time.sleep(5)
         i = qbt.sync.maindata.delta()
         free = round(i.server_state.free_space_on_disk / 2 ** 30)
         ctrlDisk = True if limit > free else False
@@ -133,7 +133,6 @@ if __name__ == '__main__':
         #scoreTorrent(cfg, qbt) # for test
         if diskUsageControl(logger, cfg, discord):
             data = scoreTorrent(cfg, qbt)
-            time.sleep(20)
             i = diskUsageControl(logger, cfg, discord)
             while i is True:
                 t = max(data, key = data.get)
@@ -145,10 +144,8 @@ if __name__ == '__main__':
                     removeSelectTorrent(answer, t, qbt)
                 else:
                     removeSelectTorrent(True, t, qbt)
-                time.sleep(20)
                 i = diskUsageControl(logger, cfg, discord)
             looger.info('Good enough for today ! Stop Dll, otherwise im gona delete everyting...')
-            time.sleep(5)
             looger.info('rm -rf / ? ready... ?')
         inter = cfg["interval"] * 60
         logger.info(f"Script will recheck your disk space in - {str(inter)} - seconds")
