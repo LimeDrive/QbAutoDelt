@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
-import psutil, time, operator, yaml, os, humanize
+import psutil, time, operator, yaml, os, sys, humanize
 import qbittorrentapi
 import logging, logging.config
 from discordwebhook import Discord
 
 ###############################
-####    Conection API     #####
+####      Fonction        #####
 ###############################
 
 def qBitConnection(logger, cfg):
@@ -14,16 +14,13 @@ def qBitConnection(logger, cfg):
     try:
         qbt.auth_log_in()
     except qbittorrentapi.LoginFailed as e:
-        logger.warning(f'Conection with qBittorrent and Web Api failed: \n{e}')
+        logger.warning(f'Conection with qBittorrent and Web Api Logging failed: \n{e}')
     logger.info(f'Conection with qBittorrent tested OK : {qbt.app.version}')
     logger.info(f'Conection with qBt Web Api tested OK : {qbt.app.web_api_version}')
     return qbt
 
-###############################
-####      Fonction        #####
-###############################
 
-def diskUsageControl(logger, cfg):
+def diskUsageControl(logger, cfg, discord):
     if cfg["ControlMethode"]:
         logger.debug("Control method : diskUsageByGiB select")
         limit = cfg["diskUsageByGiB"]["val"]
@@ -72,6 +69,41 @@ def scoreTorrent(cfg, qbt):
     logger.debug( "Data update, torrent scored : \n" + str(data) )
     return data
 
+def confirmInput(question, default="no"):
+    valid = {"yes": True, "y": True, "ye": True,
+             "no": False, "n": False}
+    if default is None:
+        prompt = " [y/n] "
+    elif default == "yes":
+        prompt = " [Y/n] "
+    elif default == "no":
+        prompt = " [y/N] "
+    else:
+        raise ValueError("Invalid default answer: '{}}'".format(default))
+    while True:
+        print(question + prompt)
+        choice = input().lower()
+        if default is not None and choice == '':
+            return valid[default]
+        elif choice in valid:
+            return valid[choice]
+        else:
+            print("Please respond with 'yes' or 'no' "
+                             "(or 'y' or 'n').\n")
+
+def removeSelectTorrent(aprouve, t, qbt):
+    if aprouve is True:
+        qbt.torrents_delete(delete_files=True, torrent_hashes=t[1])
+        time.sleep(3)
+        logger.info(f'Script delete: {t[0]}, {str(size)} free up.')
+        discord.post(content=f'Torrent delete: {t[0]}, {str(size)} free up.')
+    else:
+        logger.debug(f'Value of isTrue are : {aprouve}')
+        logger.info(f"You don't approve my choise so... Scipt will Exit in 20 seconds")
+        discord.post(content=f"You don't approve my choise so... Scipt will Exit in 5 seconds")
+        time.sleep(5)
+        sys.exit('INFO.....exit by user choise. CyU :(')
+
 
 ###############################
 ####        Script        #####
@@ -94,23 +126,22 @@ if __name__ == '__main__':
     # Try to establish Qbittorrent connection
     qbt = qBitConnection(logger, cfg)
 
-
     while True:
         #scoreTorrent(cfg, qbt) # for test
-        if diskUsageControl(logger, cfg):
+        if diskUsageControl(logger, cfg, discord):
             data = scoreTorrent(cfg, qbt)
-            i = diskUsageControl(logger, cfg)
+            i = diskUsageControl(logger, cfg, discord)
             while i is True:
                 t = max(data, key = data.get)
-                qbt.torrents_delete(delete_files=True, torrent_hashes=t[1])
-                time.sleep(3)
                 size = humanize.naturalsize(t[2], binary=True)
-                logger.info(f'Script delete: {t[0]}, {str(size)} free up.')
-                discord.post(content=f'Torrent delete: {t[0]}, {str(size)} free up.')
-                del data[max_key]
-                logger.info('Script will sleep 45 seconds...CY-L ;)')
-                time.sleep(45)
-                i = diskUsageControl(logger, cfg)
+                security = cfg["safe"]
+                if security is True:
+                    question = f'Remove: {t[0]}, to free up {str(size)} of disk space ?  '
+                    answer = confirmInput(question, default="no")
+                    removeSelectTorrent(answer, t, qbt)
+                else:
+                    removeSelectTorrent(True, t, qbt)
+                i = diskUsageControl(logger, cfg, discord)
             looger.info('Good enough for today ! Stop Dll, otherwise im gona delete everyting...')
             time.sleep(5)
             looger.info('rm -rf / ? ready... ?')
