@@ -4,17 +4,14 @@ import psutil, time, operator, yaml, os, sys, humanize
 import qbittorrentapi
 import logging, logging.config
 from discordwebhook import Discord
-from tenacity import retry, stop_after_attempt, before_sleep_log, before_sleep, retry_if_result, after_log, wait_fixed
+from tenacity import retry, stop_after_attempt, after_log, wait_fixed
 
-# Logging Consol + File
+## Logging Consol + File
 os.makedirs("log", exist_ok=True)
 logging.config.fileConfig('config/logging.conf')
 logger = logging.getLogger(__name__)
 
-###############################
-####      Fonction        #####
-###############################
-
+## Qbittorrent API conection.
 @retry(stop=stop_after_attempt(20), after=after_log(logger, logging.WARNING), wait=wait_fixed(20))
 def qBitConnection(logger, cfg):
     qbt = qbittorrentapi.Client(host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_log"]["qbt_user"], password=cfg["qbt_log"]["qbt_pass"])
@@ -27,6 +24,7 @@ def qBitConnection(logger, cfg):
         raise
     return qbt
 
+## Disk space controle, return bol follows parameter
 def diskUsageControl():
     if cfg["ControlMethode"]:
         time.sleep(60)
@@ -55,7 +53,7 @@ def diskUsageControl():
             logger.info(f"Disk Space use at {str(percent)}% - Your allow to fill up {str(limit - percent)} % before deleting script process")
     return ctrlDisk
     
-
+## Torrents scroring
 def scoreTorrent(cfg, qbt):
     min_time = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
     min_ratio = cfg["t_statistique"]["min_Ratio"]
@@ -79,6 +77,7 @@ def scoreTorrent(cfg, qbt):
     logger.debug( "Data update, torrent scored : \n" + str(data) )
     return data
 
+## Prompt confirmation [y/n]
 def confirmInput(question, default="no"):
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
@@ -101,6 +100,7 @@ def confirmInput(question, default="no"):
             print("Please respond with 'yes' or 'no' "
                              "(or 'y' or 'n').\n")
 
+## Remove Torrents
 def removeSelectTorrent(aprouve, t, qbt):
     if aprouve is True:
         qbt.torrents_delete(delete_files=True, torrent_hashes=t[1])
@@ -130,14 +130,14 @@ if __name__ == '__main__':
     # Discord notify
     useDiscord = cfg["discord"]["use"]
     discord = Discord(url=cfg["discord"]["webhook"])
-    emb1 = [{"url": "https://github.com/LimeDrive/qb-auto-delt", "title": "Qb-auto-delt", "description": "Disk space Control Notification"}]
-    emb2 = [{"url": "https://github.com/LimeDrive/qb-auto-delt", "title": "Qb-auto-delt", "description": "Torrents was remove from Your Serve"}]
+    emb1 = [{"url": "https://github.com/LimeDrive/qb-auto-delt", "title": "Disk space Control"}]
+    emb2 = [{"url": "https://github.com/LimeDrive/qb-auto-delt", "title": "Torrents Delete"}]
 
     # Try to establish Qbittorrent connection
     qbt = qBitConnection(logger, cfg)
 
     while True:
-        #scoreTorrent(cfg, qbt) # for test
+        # scoreTorrent(cfg, qbt) # for test
         if diskUsageControl():
             data = scoreTorrent(cfg, qbt)
             i = diskUsageControl()
@@ -157,4 +157,3 @@ if __name__ == '__main__':
         inter = cfg["interval"] * 60
         logger.info(f"Script will recheck your disk space in - {str(inter)} - seconds")
         time.sleep(inter)
-        logger.debug('Script restart')
