@@ -11,4 +11,5 @@ PyYAML==5.4.1
 qbittorrent-api==2021.4.20
 requests==2.25.1
 six==1.15.0
+tenacity==7.0.0
 urllib3==1.26.4

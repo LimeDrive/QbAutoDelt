@@ -4,26 +4,34 @@ import psutil, time, operator, yaml, os, sys, humanize
 import qbittorrentapi
 import logging, logging.config
 from discordwebhook import Discord
+from tenacity import retry, stop_after_attempt, before_sleep_log, before_sleep, retry_if_result, after_log, wait_fixed
+
+# Logging Consol + File
+os.makedirs("log", exist_ok=True)
+logging.config.fileConfig('config/logging.conf')
+logger = logging.getLogger(__name__)
 
 ###############################
 ####      Fonction        #####
 ###############################
 
+@retry(stop=stop_after_attempt(20), after=after_log(logger, logging.WARNING), wait=wait_fixed(20))
 def qBitConnection(logger, cfg):
     qbt = qbittorrentapi.Client(host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_log"]["qbt_user"], password=cfg["qbt_log"]["qbt_pass"])
     try:
         qbt.auth_log_in()
-    except qbittorrentapi.LoginFailed as e:
-        logger.warning(f'Conection with qBittorrent and Web Api Logging failed: \n{e}')
-    logger.info(f'Conection with qBittorrent tested OK : {qbt.app.version}')
-    logger.info(f'Conection with qBt Web Api tested OK : {qbt.app.web_api_version}')
+        logger.info(f'Conection with qBittorrent tested OK : {qbt.app.version}')
+        logger.info(f'Conection with qBt Web Api tested OK : {qbt.app.web_api_version}')
+    except:
+        logger.warning(f'Conection with qBittorrent and Web Api Logging failed')
+        raise
     return qbt
-
 
 def diskUsageControl(logger, cfg, discord):
     if cfg["ControlMethode"]:
         logger.debug("Control method : diskUsageByGiB select")
         limit = cfg["diskUsageByGiB"]["val"]
+        time.sleep(5)
         i = qbt.sync.maindata.delta()
         free = round(i.server_state.free_space_on_disk / 2 ** 30)
         ctrlDisk = True if limit > free else False
@@ -115,11 +123,6 @@ if __name__ == '__main__':
     with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    # Logging Consol + File
-    os.makedirs("log", exist_ok=True)
-    logging.config.fileConfig('config/logging.conf')
-    logger = logging.getLogger(__name__)
-
     # Discord notify
     discord = Discord(url=cfg["discord"]["webhook"])
 
@@ -130,6 +133,7 @@ if __name__ == '__main__':
         #scoreTorrent(cfg, qbt) # for test
         if diskUsageControl(logger, cfg, discord):
             data = scoreTorrent(cfg, qbt)
+            time.sleep(20)
             i = diskUsageControl(logger, cfg, discord)
             while i is True:
                 t = max(data, key = data.get)
@@ -141,6 +145,7 @@ if __name__ == '__main__':
                     removeSelectTorrent(answer, t, qbt)
                 else:
                     removeSelectTorrent(True, t, qbt)
+                time.sleep(20)
                 i = diskUsageControl(logger, cfg, discord)
             looger.info('Good enough for today ! Stop Dll, otherwise im gona delete everyting...')
             time.sleep(5)
