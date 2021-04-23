@@ -91,8 +91,9 @@ def scoreTorrent(cfg, qbt):
     tgstate = cfg["t_tags"]["states"]
     data = dict()
     for t in qbt.torrents_info():
-        s_seed = round(100 + (t.seeding_time - min_time) / 6000,
-                       2) if t.seeding_time > min_time else -10000
+        #logger.debug(t)
+        s_seed = round(100 + (t.time_active - min_time) / 6000,
+                       2) if t.time_active > min_time else -10000
         s_ratio = -10000 if t.ratio < min_ratio else t.ratio * 100
         s_tag = 9999999 if t.tags in tgprio else 100000 if t.tags in tgpref else - \
             99999999999 if t.tags in tgex else 0
@@ -102,7 +103,7 @@ def scoreTorrent(cfg, qbt):
         data[t_info] = t_score
         logger.debug(f"\n \
             {t.name} :\n \
-            Ratio: {str(t.ratio)}/={str(s_ratio)}   SeedTime: {str(t.seeding_time)}/={str(s_seed)}   Tag: {t.tags}/={str(s_tag)}   State: {t.state}/={str(s_state)}\n \
+            Ratio: {str(t.ratio)}/={str(s_ratio)}   SeedTime: {str(t.time_active)}/={str(s_seed)}   Tag: {t.tags}/={str(s_tag)}   State: {t.state}/={str(s_state)}\n \
             Final Score: {str(t_score)}")
     logger.debug(f"Data update, torrent scored : \n" + str(data))
     return data
@@ -160,6 +161,7 @@ if __name__ == '__main__':
         ctrlState = diskUsageByGiB() if cfg["ControlMethode"] is True else diskUsageByPercent()
         if ctrlState:
             logger.debug(f"Control of ctrlState value : {ctrlState}")
+            time.sleep(3)
             dataScored = scoreTorrent(cfg, qbt)
             totalRemove = 0
             # Deleting loop
