@@ -35,7 +35,7 @@ safe: True
 
 ## Intervalle entre les exécutions du programme en minute
 
-interval: 10
+interval: 1
 
 ## Paramètres pour le tri et la sélection des torrents à supprimer en priorité :
 
