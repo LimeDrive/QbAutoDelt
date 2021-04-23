@@ -49,14 +49,14 @@ def diskUsageByGiB():
     ctrlDisk = True if (freeDiskSpace - limitDiskSpace) < 0 else False
     if ctrlDisk:
         logger.info(
-            f"{Fore.RED}Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} -  Over than {str( limitDiskSpace - freeDiskSpace )} GiB, deleting script start{Style.RESET_ALL}")
+            f"{Fore.RED}Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} -  Over than {round( limitDiskSpace - freeDiskSpace, 2 )} GiB, deleting script start{Style.RESET_ALL}")
         if useDiscord:
             discord.post(
-                content=f"Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} -  Over than {str( limitDiskSpace - freeDiskSpace )} GiB, deleting script start", embeds=emb1, username="Qbittorrent")
+                content=f"Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} -  Over than {round( limitDiskSpace - freeDiskSpace, 2 )} GiB, deleting script start", embeds=emb1, username="Qbittorrent")
         return round(limitDiskSpace - freeDiskSpace) * 2 ** 30
     else:
         logger.info(
-    f"{Fore.GREEN}Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {str( freeDiskSpace - limitDiskSpace )} GiB before deleting script process{Style.RESET_ALL}")
+    f"{Fore.GREEN}Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {round( freeDiskSpace - limitDiskSpace, 2 )} GiB before deleting script process{Style.RESET_ALL}")
 
 # Fonction de control disque par %, retourn la quantité d'espace en KiB au dessus de la limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas
 
@@ -157,10 +157,9 @@ if __name__ == '__main__':
     # Main loop
     while True:
         qbt = qBitConnection(logger, cfg)
-        ctrlState = diskUsageByGiB(
-        ) if cfg["ControlMethode"] is True else diskUsageByPercent()
+        ctrlState = diskUsageByGiB() if cfg["ControlMethode"] is True else diskUsageByPercent()
         if ctrlState:
-            looger.debug(f"Control of ctrlState value : {bool(crtlState)}")
+            logger.debug(f"Control of ctrlState value : {ctrlState}")
             dataScored = scoreTorrent(cfg, qbt)
             totalRemove = 0
             # Deleting loop
@@ -171,7 +170,7 @@ if __name__ == '__main__':
                     question = f'{Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.RED}{torrentWithHighScore[0]}, {Fore.CYAN}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
                     answer = confirmInput(question, default="no")
                     if not answer:
-                        logger.debug(f'Value of user answer are : {aprouve}')
+                        logger.debug(f'Value of user answer are : {answer}')
                         logger.info(
                             f"{Fore.RED}You don't approve my choise so... Scipt will Exit in 20 seconds{Style.RESET_ALL}")
                         if useDiscord:
@@ -190,7 +189,7 @@ if __name__ == '__main__':
                 logger.debug(
                     f"Total remove space free in the loop : {humanize.naturalsize(totalRemove, binary=True)}")
                 del dataScored[torrentWithHighScore]
-                sleep.time(20)
+                time.sleep(20)
         else:
             logger.debug(f"Control of ctrlState value : {bool(ctrlState)}")
         interval = cfg['interval']
