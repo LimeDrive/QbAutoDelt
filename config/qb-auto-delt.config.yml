@@ -27,7 +27,7 @@ diskUsageByPercent:
 ## Si ControlMethode = True
 
 diskUsageByGiB:
-  val: 150
+  val: 100
 
 ## Safe mode: Mode de sécurité, prompt l'utilisateur pour une confirmation de suppression du torrent.
 
