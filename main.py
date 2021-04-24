@@ -56,9 +56,10 @@ def diskUsageByGiB():
         return round(limitDiskSpace - freeDiskSpace) * 2 ** 30
     else:
         logger.info(
-    f"{Fore.GREEN}Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {round( freeDiskSpace - limitDiskSpace, 2 )} GiB before deleting script process{Style.RESET_ALL}")
+            f"{Fore.GREEN}Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {round( freeDiskSpace - limitDiskSpace, 2 )} GiB before deleting script process{Style.RESET_ALL}")
 
 # Fonction de control disque par %, retourn la quantité d'espace en KiB au dessus de la limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas
+
 
 def diskUsageByPercent():
     logger.debug(
@@ -69,51 +70,73 @@ def diskUsageByPercent():
     ctrlDisk = True if percentDisk > percentMax else False
     if ctrlDisk:
         logger.info(
-            f"{Fore.RED}Disk Space use at {str(percentDisk)}% -  Over than {str( percentDisk - percentMax )} %, deleting script start{Style.RESET_ALL}")
+            f"{Fore.RED}Disk Space use at {str(percentDisk)}% -  Over than {str(round(percentDisk - percentMax, 2))} %, deleting script start{Style.RESET_ALL}")
         if useDiscord:
             discord.post(
-                content=f"Disk Space use at {str(percentDisk)}% -  Over than {str( percentDisk - percentMax )} %, deleting script start", embeds=emb1, username="Qbittorrent")
-        ctrllDiskOver = (statDisk.total / 100) * round((percentDisk - percentMax) * 2 ** 30)
+                content=f"Disk Space use at {str(percentDisk)}% -  Over than {str(round(percentDisk - percentMax, 2))} %, deleting script start", embeds=emb1, username="Qbittorrent")
+        ctrlDiskOver = (statDisk.total / 100) * \
+            round((percentDisk - percentMax) * 2 ** 30)
         return ctrlDiskOver
     else:
         logger.info(
-            f"{Fore.GREEN}Disk Space use at {str(percentDisk)}% - Your allow to fill up {str( percentMax - percentDisk )} % before deleting script process{Style.RESET_ALL}")
+            f"{Fore.GREEN}Disk Space use at {str(percentDisk)}% - Your allow to fill up {str(round(percentMax - percentDisk,2))} % before deleting script process{Style.RESET_ALL}")
 
-# Torrents scroring
+# Return True if the torrent a to Exclud
 
 
-def scoreTorrent(cfg, qbt):
-    ## num_complete  a imp
-    min_time = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
-    min_ratio = cfg["t_statistique"]["min_Ratio"]
-    tgprio = cfg["t_tags"]["priority"]
-    tgpref = cfg["t_tags"]["prefer"]
-    tgex = cfg["t_tags"]["exclud"]
-    tgstate = cfg["t_states"]["states"]
-    catprio = cfg["t_cats"]["priority"]
-    catpref = cfg["t_cats"]["prefer"]
-    catex = cfg["t_cats"]["exclud"]
-    data = dict()
-    for t in qbt.torrents_info():
-        #logger.debug(t)
-        s_seed = round(100 + (t.time_active - min_time) / 6000,
-                       2) if t.time_active > min_time else -10000
-        s_ratio = -10000 if t.ratio < min_ratio else t.ratio * 100
-        s_comp = t.num_complete * 100
-        s_tag = 9999999 if t.tags in tgprio else 100000 if t.tags in tgpref else - \
-            99999999999 if t.tags in tgex else 0
-        s_cat = 9999999 if t.category in catprio else 100000 if t.category in catpref else - \
-            99999999999 if t.category in catex else 0
-        s_state = -99999999999 if t.state in tgstate else 0
-        t_score = s_ratio + s_seed + s_tag + s_state + s_cat + s_comp
-        t_info = (t.name, t.hash, t.size)
-        data[t_info] = t_score
-        logger.debug(f"\n \
-            {t.name} :\n \
-            Ratio: {str(t.ratio)}/={str(s_ratio)}   SeedTime: {str(t.time_active)}/={str(s_seed)}   Tag: {t.tags}/={str(s_tag)}   Category:  Tag: {t.category}/={str(s_cat)}   Popularity: {t.num_complete}/={str(s_comp)}   State: {t.state}/={str(s_state)}\n \
-            Final Score: {str(t_score)}")
-    logger.debug(f"Data update, torrent scored : \n" + str(data))
-    return data
+def excludTorrent(torrent):
+    excludTags = cfg["t_tags"]["exclud"]
+    excludCats = cfg["t_cats"]["exclud"]
+    excludStates = cfg["t_states"]["states"]
+    excludPublic = cfg["excludPublic"]
+    minTime = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
+    if torrent.time_active > minTime:
+        if (torrent.trackers_count <= 1 and excludPublic is True):
+            return True
+    elif torrent.tags in excludTags:
+        return True
+    elif torrent.category in excludCats:
+        return True
+    elif torrent.state in excludStates:
+        return True
+
+# Torrent scorring algo
+
+def scoreTorrent():
+    minTime = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
+    tagsPriority = cfg["t_tags"]["priority"]
+    categoryPriority = cfg["t_cats"]["priority"]
+    tagsPrefer = cfg["t_tags"]["prefer"]
+    categoryPrefer = cfg["t_cats"]["prefer"]
+    torrentData = dict()
+    for torrent in qbt.torrents_info():
+        publicPriority = True if (
+            torrent.trackers_count > 1 and cfg["excludPublic"] is True) else False
+        logger.debug(torrent)
+        torrentToExclud = excludTorrent(torrent)
+        logger.debug(f" Torrent to exclud : {torrentToExclud}")
+        if not torrentToExclud:
+            scoreSeed = round(torrent.time_active / 60 / 60 / 24 * 0.2, 2)
+            scoreRatio = round(torrent.ratio, 2)
+            scorePopularity = torrent.num_complete * 0.02
+            scoreIsPublic = 10000 if publicPriority is True else 0
+            scorePriority = 1000 if torrent.tags in tagsPriority else 1000 if torrent.category in categoryPriority else 0
+            scorePrefer = 100 if torrent.tags in tagsPrefer else 100 if torrent.category in categoryPrefer else 0
+            torrentInfo = (torrent.name, torrent.hash, torrent.size)
+            torrentFinalScore = sum(
+                (scoreSeed, scoreRatio, scorePriority, scorePrefer, scoreIsPublic, scorePopularity), 10)
+            torrentData[torrentInfo] = torrentFinalScore
+            logger.debug(
+                f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, \
+                SeedTime: {str(torrent.time_active)}/={str(scoreSeed)}, \
+                Popularity: {str(scorePopularity)}, \
+                Prio: {str(scorePriority)}, \
+                Is Public: {str(scoreIsPublic)}, \
+                Prefer: {str(scorePrefer)}")
+            logger.debug(
+                f"{torrent.name} :: Final Score: {str(torrentFinalScore)}")
+    logger.debug(f"Data update, torrent scored : \n" + str(torrentData))
+    return torrentData
 
 # Prompt confirmation [y/n]
 
@@ -165,11 +188,13 @@ if __name__ == '__main__':
     # Main loop
     while True:
         qbt = qBitConnection(logger, cfg)
-        ctrlState = diskUsageByGiB() if cfg["ControlMethode"] is True else diskUsageByPercent()
+        scoreTorrent()  # for test propose
+        ctrlState = diskUsageByGiB(
+        ) if cfg["ControlMethode"] is True else diskUsageByPercent()
         if ctrlState:
             logger.debug(f"Control of ctrlState value : {ctrlState}")
             time.sleep(3)
-            dataScored = scoreTorrent(cfg, qbt)
+            dataScored = scoreTorrent()
             totalRemove = 0
             # Deleting loop
             while totalRemove < ctrlState:
@@ -184,7 +209,7 @@ if __name__ == '__main__':
                             f"{Fore.RED}You don't approve my choise so... Scipt will Exit in 20 seconds{Style.RESET_ALL}")
                         if useDiscord:
                             discord.post(content=f"You don't approve my choise so... Scipt will Exit in 5 seconds",
-                                        embeds=emb2, username="Qbittorrent")
+                                         embeds=emb2, username="Qbittorrent")
                             time.sleep(5)
                         break
                 qbt.torrents_delete(delete_files=True,
@@ -193,7 +218,7 @@ if __name__ == '__main__':
                     f'{Fore.YELLOW}{Style.BRIGHT}Script delete: {Fore.RED}{torrentWithHighScore[0]}, {Fore.CYAN}{humanize.naturalsize(sizeTorrent, binary=True)}{Fore.YELLOW} free up.{Style.RESET_ALL}')
                 if useDiscord:
                     discord.post(
-                    content=f'Torrent delete: {torrentWithHighScore[0]}, {humanize.naturalsize(sizeTorrent, binary=True)} free up.', embeds=emb2, username="Qbittorrent")
+                        content=f'Torrent delete: {torrentWithHighScore[0]}, {humanize.naturalsize(sizeTorrent, binary=True)} free up.', embeds=emb2, username="Qbittorrent")
                 totalRemove = totalRemove + sizeTorrent
                 logger.debug(
                     f"Total remove space free in the loop : {humanize.naturalsize(totalRemove, binary=True)}")
@@ -203,5 +228,5 @@ if __name__ == '__main__':
             logger.debug(f"Control of ctrlState value : {bool(ctrlState)}")
         interval = cfg['interval']
         logger.info(
-        f"{Fore.CYAN}Script will recheck your disk space in - {str(interval)} - minute{Style.RESET_ALL}")
+            f"{Fore.CYAN}Script will recheck your disk space in - {str(interval)} - minute{Style.RESET_ALL}")
         time.sleep(int(interval) * 60)

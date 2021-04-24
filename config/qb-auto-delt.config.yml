@@ -14,13 +14,13 @@ qbt_log:
 ##    False = Déclanchement de la suppréssion quand vous dépassé XX % d'espace disque
 ##
 
-ControlMethode: True # True or False
+ControlMethode: False # True or False
 
 ## Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveillé.
 ## Si ControlMethode = False
 
 diskUsageByPercent:
-  max: 80
+  max: 30
   path: "./"
 
 ## Qantité d'espace disque restante exprimé en GiB qui déclenche la suppression des torrents.
@@ -42,6 +42,10 @@ interval: 15
 t_statistique:
   min_SeedTime: 80 # A exprimer en heures
   min_Ratio: 0 # Ratio O = null
+
+## Automatique Public Tracker Priority with ignore seeding time condition.
+
+excludPublic: True
 
 ## Les Tags aka étiquette (dans qBt) qui permettrons de faire passer un torrent en priorité, de le favoriser ou de l'exlure.
 
