@@ -20,14 +20,14 @@ ControlMethode: True # True or False
 ## Si ControlMethode = False
 
 diskUsageByPercent:
-  max: 30
+  max: 80
   path: "./"
 
 ## Qantité d'espace disque restante exprimé en GiB qui déclenche la suppression des torrents.
 ## Si ControlMethode = True
 
 diskUsageByGiB:
-  val: 30
+  val: 150
 
 ## Safe mode: Mode de sécurité, prompt l'utilisateur pour une confirmation de suppression du torrent.
 

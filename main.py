@@ -170,23 +170,23 @@ def confirmInput(question, default="no"):
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
     if default is None:
-        prompt = f"{Fore.RED}{Style.BRIGHT} [y/n] {Style.RESET_ALL}"
+        prompt = f"{Fore.RED}{Style.BRIGHT} [y/n] {Style.RESET_ALL}:: "
     elif default == "yes":
-        prompt = f"{Fore.RED}{Style.BRIGHT} [Y/n] {Style.RESET_ALL}"
+        prompt = f"{Fore.RED}{Style.BRIGHT} [Y/n] {Style.RESET_ALL}:: "
     elif default == "no":
-        prompt = f"{Fore.RED}{Style.BRIGHT} [y/N] {Style.RESET_ALL}"
+        prompt = f"{Fore.RED}{Style.BRIGHT} [y/N] {Style.RESET_ALL}:: "
     else:
         raise ValueError("Invalid default answer: '{}}'".format(default))
     while True:
-        print(question + prompt)
-        choice = input().lower()
+        # print(question + prompt)
+        choice = input(question + prompt).lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
             return valid[choice]
         else:
             print(
-                f"{Fore.RED}{Style.BRIGHT}Please respond with 'yes' or 'no' (or 'y' or 'n').{Style.RESET_ALL}")
+                f"{Fore.RED}{Style.BRIGHT}:.    Please respond with 'yes' or 'no' (or 'y' or 'n').{Style.RESET_ALL}")
 
 ###############################
 ####        Script        #####
@@ -229,7 +229,7 @@ if __name__ == '__main__':
                 if cfg["safe"]:
                     named_tuple = time.localtime()  # get struct_time
                     time_string = time.strftime("%Y-%m-%d,%H:%M:%S", named_tuple)
-                    question = f'INFO  ::  {time_string},000 - __main__ - {Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
+                    question = f'SAFE  ::  {time_string},000 - __main__ - {Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
                     answer = confirmInput(question, default="no")
                     if not answer:
                         logger.debug(f'Value of user answer are : {answer}')
