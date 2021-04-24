@@ -16,18 +16,18 @@ qbt_log:
 
 ControlMethode: True # True or False
 
-## Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveillé. 
+## Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveillé.
 ## Si ControlMethode = False
 
 diskUsageByPercent:
   max: 80
-  path: './'
+  path: "./"
 
 ## Qantité d'espace disque restante exprimé en GiB qui déclenche la suppression des torrents.
 ## Si ControlMethode = True
 
 diskUsageByGiB:
-  val: 150
+  val: 25
 
 ## Safe mode: Mode de sécurité, prompt l'utilisateur pour une confirmation de suppression du torrent.
 
@@ -35,7 +35,7 @@ safe: True
 
 ## Intervalle entre les exécutions du programme en minute
 
-interval: 1
+interval: 15
 
 ## Paramètres pour le tri et la sélection des torrents à supprimer en priorité :
 
@@ -55,6 +55,7 @@ t_tags:
   exclud:
     - "DONOT"
     - "PERSO"
+t_states:
   states:
     - "checkingDL"
     - "allocating"
@@ -62,6 +63,16 @@ t_tags:
     - "downloading"
     - "metaDL"
     - "moving"
+t_cats:
+  priority:
+    - "PUBLIC"
+    - "TODELT"
+  prefer:
+    - "radarr"
+    - "tv-sonarr"
+  exclud:
+    - "DONOT"
+    - "PERSO"
 
 ## Discord, droit etre activé avec True et l'url du webhook pour les notification :
 
