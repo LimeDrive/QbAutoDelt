@@ -27,7 +27,7 @@ diskUsageByPercent:
 ## Si ControlMethode = True
 
 diskUsageByGiB:
-  val: 150
+  val: 25
 
 ## Safe mode: Mode de sécurité, prompt l'utilisateur pour une confirmation de suppression du torrent.
 
@@ -35,7 +35,7 @@ safe: True
 
 ## Intervalle entre les exécutions du programme en minute
 
-interval: 1
+interval: 15
 
 ## Paramètres pour le tri et la sélection des torrents à supprimer en priorité :
 
@@ -68,8 +68,8 @@ t_cats:
     - "PUBLIC"
     - "TODELT"
   prefer:
-    - "YGG"
-    - "CASA"
+    - "radarr"
+    - "tv-sonarr"
   exclud:
     - "DONOT"
     - "PERSO"
