@@ -14,7 +14,7 @@ qbt_log:
 ##    False = Déclanchement de la suppréssion quand vous dépassé XX % d'espace disque
 ##
 
-ControlMethode: False # True or False
+ControlMethode: True # True or False
 
 ## Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveillé.
 ## Si ControlMethode = False
@@ -27,7 +27,7 @@ diskUsageByPercent:
 ## Si ControlMethode = True
 
 diskUsageByGiB:
-  val: 25
+  val: 30
 
 ## Safe mode: Mode de sécurité, prompt l'utilisateur pour une confirmation de suppression du torrent.
 

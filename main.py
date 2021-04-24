@@ -25,6 +25,7 @@ init(autoreset=True)
 
 @retry(stop=stop_after_attempt(20), after=after_log(logger, logging.WARNING), wait=wait_fixed(20))
 def qBitConnection(logger, cfg):
+
     qbt = qbittorrentapi.Client(
         host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_log"]["qbt_user"], password=cfg["qbt_log"]["qbt_pass"], VERIFY_WEBUI_CERTIFICATE=False)
     try:
@@ -41,12 +42,14 @@ def qBitConnection(logger, cfg):
 
 
 def diskUsageByGiB():
+
     logger.debug(f"Control method : diskUsageByGiB select, start calculation")
     limitDiskSpace = cfg["diskUsageByGiB"]["val"]
     infoDisk = qbt.sync.maindata.delta()
     freeDiskSpace = round(
         infoDisk.server_state.free_space_on_disk / 2 ** 30, 2)
     ctrlDisk = True if (freeDiskSpace - limitDiskSpace) < 0 else False
+
     if ctrlDisk:
         logger.info(
             f"{Fore.RED}Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} -  Over than {round( limitDiskSpace - freeDiskSpace, 2 )} GiB, deleting script start{Style.RESET_ALL}")
@@ -62,12 +65,14 @@ def diskUsageByGiB():
 
 
 def diskUsageByPercent():
+
     logger.debug(
         "Control method : diskUsageByPercent select... :: start calculation")
     statDisk = psutil.disk_usage(cfg["diskUsageByPercent"]["path"])
     percentDisk = round(statDisk.percent, 1)
     percentMax = cfg["diskUsageByPercent"]["max"]
     ctrlDisk = True if percentDisk > percentMax else False
+
     if ctrlDisk:
         logger.info(
             f"{Fore.RED}Disk Space use at {str(percentDisk)}% -  Over than {str(round(percentDisk - percentMax, 2))} %, deleting script start{Style.RESET_ALL}")
@@ -85,11 +90,13 @@ def diskUsageByPercent():
 
 
 def excludTorrent(torrent):
+
     excludTags = cfg["t_tags"]["exclud"]
     excludCats = cfg["t_cats"]["exclud"]
     excludStates = cfg["t_states"]["states"]
     excludPublic = cfg["excludPublic"]
     minTime = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
+
     if torrent.time_active > minTime:
         if (torrent.trackers_count <= 1 and excludPublic is True):
             return True
@@ -102,13 +109,16 @@ def excludTorrent(torrent):
 
 # Torrent scorring algo
 
+
 def scoreTorrent():
+
     minTime = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
     tagsPriority = cfg["t_tags"]["priority"]
     categoryPriority = cfg["t_cats"]["priority"]
     tagsPrefer = cfg["t_tags"]["prefer"]
     categoryPrefer = cfg["t_cats"]["prefer"]
     torrentData = dict()
+    
     for torrent in qbt.torrents_info():
         publicPriority = True if (
             torrent.trackers_count > 1 and cfg["excludPublic"] is True) else False
@@ -138,18 +148,33 @@ def scoreTorrent():
     logger.debug(f"Data update, torrent scored : \n" + str(torrentData))
     return torrentData
 
+# define the countdown func.
+
+
+def countdown(t):
+
+    while t:
+        mins, secs = divmod(t, 60)
+        named_tuple = time.localtime()  # get struct_time
+        time_string = time.strftime("%Y-%m-%d,%H:%M:%S", named_tuple)
+        timer = '{:02d}:{:02d}'.format(mins, secs)
+        print(f"INFO  ::  {time_string},000 - __main__ - {Fore.CYAN}Script will recheck your disk space in - {timer} - minute{Style.RESET_ALL}", end="\r")
+        time.sleep(1)
+        t -= 1
+
 # Prompt confirmation [y/n]
 
 
 def confirmInput(question, default="no"):
+    
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
     if default is None:
-        prompt = " [y/n] "
+        prompt = f"{Fore.RED}{Style.BRIGHT} [y/n] {Style.RESET_ALL}"
     elif default == "yes":
-        prompt = " [Y/n] "
+        prompt = f"{Fore.RED}{Style.BRIGHT} [Y/n] {Style.RESET_ALL}"
     elif default == "no":
-        prompt = " [y/N] "
+        prompt = f"{Fore.RED}{Style.BRIGHT} [y/N] {Style.RESET_ALL}"
     else:
         raise ValueError("Invalid default answer: '{}}'".format(default))
     while True:
@@ -161,7 +186,7 @@ def confirmInput(question, default="no"):
             return valid[choice]
         else:
             print(
-                f"{Fore.RED}{Style.BRIGHT}Please respond with 'yes' or 'no' (or 'y' or 'n').\n{Style.RESET_ALL}")
+                f"{Fore.RED}{Style.BRIGHT}Please respond with 'yes' or 'no' (or 'y' or 'n').{Style.RESET_ALL}")
 
 ###############################
 ####        Script        #####
@@ -187,8 +212,9 @@ if __name__ == '__main__':
 
     # Main loop
     while True:
+
         qbt = qBitConnection(logger, cfg)
-        scoreTorrent()  # for test propose
+        # scoreTorrent()  # for test propose
         ctrlState = diskUsageByGiB(
         ) if cfg["ControlMethode"] is True else diskUsageByPercent()
         if ctrlState:
@@ -201,7 +227,9 @@ if __name__ == '__main__':
                 torrentWithHighScore = max(dataScored, key=dataScored.get)
                 sizeTorrent = int(torrentWithHighScore[2])
                 if cfg["safe"]:
-                    question = f'{Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.RED}{torrentWithHighScore[0]}, {Fore.CYAN}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
+                    named_tuple = time.localtime()  # get struct_time
+                    time_string = time.strftime("%Y-%m-%d,%H:%M:%S", named_tuple)
+                    question = f'INFO  ::  {time_string},000 - __main__ - {Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
                     answer = confirmInput(question, default="no")
                     if not answer:
                         logger.debug(f'Value of user answer are : {answer}')
@@ -215,18 +243,18 @@ if __name__ == '__main__':
                 qbt.torrents_delete(delete_files=True,
                                     torrent_hashes=torrentWithHighScore[1])
                 logger.info(
-                    f'{Fore.YELLOW}{Style.BRIGHT}Script delete: {Fore.RED}{torrentWithHighScore[0]}, {Fore.CYAN}{humanize.naturalsize(sizeTorrent, binary=True)}{Fore.YELLOW} free up.{Style.RESET_ALL}')
+                    f'{Fore.YELLOW}{Style.BRIGHT}Script delete: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Fore.YELLOW} free up.{Style.RESET_ALL}')
                 if useDiscord:
                     discord.post(
                         content=f'Torrent delete: {torrentWithHighScore[0]}, {humanize.naturalsize(sizeTorrent, binary=True)} free up.', embeds=emb2, username="Qbittorrent")
                 totalRemove = totalRemove + sizeTorrent
                 logger.debug(
-                    f"Total remove space free in the loop : {humanize.naturalsize(totalRemove, binary=True)}")
+                    f"Total remove space free in the loop: {humanize.naturalsize(totalRemove, binary=True)} sleep 10 second")
                 del dataScored[torrentWithHighScore]
-                time.sleep(20)
+                time.sleep(10)
         else:
             logger.debug(f"Control of ctrlState value : {bool(ctrlState)}")
         interval = cfg['interval']
-        logger.info(
+        logger.debug(
             f"{Fore.CYAN}Script will recheck your disk space in - {str(interval)} - minute{Style.RESET_ALL}")
-        time.sleep(int(interval) * 60)
+        countdown(int(interval) * 60)
