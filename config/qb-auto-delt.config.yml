@@ -16,12 +16,12 @@ qbt_log:
 
 ControlMethode: True # True or False
 
-## Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveillé. 
+## Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveillé.
 ## Si ControlMethode = False
 
 diskUsageByPercent:
   max: 80
-  path: './'
+  path: "./"
 
 ## Qantité d'espace disque restante exprimé en GiB qui déclenche la suppression des torrents.
 ## Si ControlMethode = True
@@ -55,6 +55,7 @@ t_tags:
   exclud:
     - "DONOT"
     - "PERSO"
+t_states:
   states:
     - "checkingDL"
     - "allocating"
@@ -62,6 +63,16 @@ t_tags:
     - "downloading"
     - "metaDL"
     - "moving"
+t_cats:
+  priority:
+    - "PUBLIC"
+    - "TODELT"
+  prefer:
+    - "YGG"
+    - "CASA"
+  exclud:
+    - "DONOT"
+    - "PERSO"
 
 ## Discord, droit etre activé avec True et l'url du webhook pour les notification :
 
