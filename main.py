@@ -155,7 +155,7 @@ def scoreTorrent():
             scoreIsPublic = 10000 if publicInPriority is True else 0
             scorePriority = 1000 if listContains(convertTolist(torrent.tags), tagsPriority) is True else 1000 if listContains(
                 convertTolist(torrent.category), categoryPriority) is True else 0
-            scorePrefer = 200 if listContains(convertTolist(torrent.tags), tagsPrefer) is True else 400 if listContains(
+            scorePrefer = 200 if listContains(convertTolist(torrent.tags), tagsPrefer) is True else 200 if listContains(
                 convertTolist(torrent.category), categoryPrefer) is True else 0
             torrentInfo = (torrent.name, torrent.hash, torrent.size)
             torrentFinalScore = sum(
