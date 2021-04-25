@@ -2,9 +2,9 @@
 ## Identifiant pour la webUI de qBittorrent :
 
 qbt_log:
-  qbt_host: "localhost:8080"
+  qbt_host: "127.0.0.1:8080"
   qbt_user: "admin"
-  qbt_pass: "adminadmin"
+  qbt_pass: "adminadmin" 
 
 ##
 ##    /!\ Configuration de la méthode de controle de l'espace disque et déclanchement de la suppréssion /!\
@@ -27,7 +27,7 @@ diskUsageByPercent:
 ## Si ControlMethode = True
 
 diskUsageByGiB:
-  val: 150
+  val: 30
 
 ## Safe mode: Mode de sécurité, prompt l'utilisateur pour une confirmation de suppression du torrent.
 
@@ -45,7 +45,7 @@ t_statistique:
 
 ## Automatique Public Tracker Priority with ignore seeding time condition.
 
-excludPublic: True
+publicPriority: True
 
 ## Les Tags aka étiquette (dans qBt) qui permettrons de faire passer un torrent en priorité, de le favoriser ou de l'exlure.
 

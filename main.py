@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# By LimeCat
 
 import psutil
 import time
@@ -85,8 +86,26 @@ def diskUsageByPercent():
     else:
         logger.info(
             f"{Fore.GREEN}Disk Space use at {str(percentDisk)}% - Your allow to fill up {str(round(percentMax - percentDisk,2))} % before deleting script process{Style.RESET_ALL}")
+    
+# Some Goody to manage the multipl tags or cat retourn by api 
 
-# Return True if the torrent a to Exclud
+
+def convertTolist(string):
+    if string:
+        st_list = list(string.split(", "))
+        return st_list
+
+
+def listContains(List1, List2):
+    if (List1 and List2):
+        set1 = set(List1)
+        set2 = set(List2)
+        if set1.intersection(set2):
+            return True
+        else:
+            return False
+        
+# Return True if the torrent are to Exclud
 
 
 def excludTorrent(torrent):
@@ -94,11 +113,13 @@ def excludTorrent(torrent):
     excludTags = cfg["t_tags"]["exclud"]
     excludCats = cfg["t_cats"]["exclud"]
     excludStates = cfg["t_states"]["states"]
-    excludPublic = cfg["excludPublic"]
+    publicInPriority = cfg["publicPriority"]
     minTime = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
+    trackerPublic = convertTolist(torrent.tracker)
+    trackerCount = 1 if not trackerPublic else len(trackerPublic)
 
-    if torrent.time_active > minTime:
-        if (torrent.trackers_count <= 1 and excludPublic is True):
+    if torrent.time_active < minTime:
+        if not (trackerCount > 1 and publicInPriority is True):
             return True
     elif torrent.tags in excludTags:
         return True
@@ -118,31 +139,35 @@ def scoreTorrent():
     tagsPrefer = cfg["t_tags"]["prefer"]
     categoryPrefer = cfg["t_cats"]["prefer"]
     torrentData = dict()
-    
+
     for torrent in qbt.torrents_info():
-        publicPriority = True if (
-            torrent.trackers_count > 1 and cfg["excludPublic"] is True) else False
+        trackerPublic = convertTolist(torrent.tracker)
+        trackerCount = 1 if not trackerPublic else len(trackerPublic)
+        publicInPriority = True if (
+            trackerCount > 1 and cfg["publicPriority"] is True) else False
         logger.debug(torrent)
         torrentToExclud = excludTorrent(torrent)
         logger.debug(f" Torrent to exclud : {torrentToExclud}")
         if not torrentToExclud:
             scoreSeed = round(torrent.time_active / 60 / 60 / 24 * 0.2, 2)
             scoreRatio = round(torrent.ratio, 2)
-            scorePopularity = torrent.num_complete * 0.02
-            scoreIsPublic = 10000 if publicPriority is True else 0
-            scorePriority = 1000 if torrent.tags in tagsPriority else 1000 if torrent.category in categoryPriority else 0
-            scorePrefer = 100 if torrent.tags in tagsPrefer else 100 if torrent.category in categoryPrefer else 0
+            scorePopularity = torrent.num_complete * 0.07
+            scoreIsPublic = 10000 if publicInPriority is True else 0
+            scorePriority = 1000 if listContains(convertTolist(torrent.tags), tagsPriority) is True else 1000 if listContains(
+                convertTolist(torrent.category), categoryPriority) is True else 0
+            scorePrefer = 200 if listContains(convertTolist(torrent.tags), tagsPrefer) is True else 400 if listContains(
+                convertTolist(torrent.category), categoryPrefer) is True else 0
             torrentInfo = (torrent.name, torrent.hash, torrent.size)
             torrentFinalScore = sum(
                 (scoreSeed, scoreRatio, scorePriority, scorePrefer, scoreIsPublic, scorePopularity), 10)
             torrentData[torrentInfo] = torrentFinalScore
             logger.debug(
                 f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, \
-                SeedTime: {str(torrent.time_active)}/={str(scoreSeed)}, \
-                Popularity: {str(scorePopularity)}, \
-                Prio: {str(scorePriority)}, \
-                Is Public: {str(scoreIsPublic)}, \
-                Prefer: {str(scorePrefer)}")
+            SeedTime: {str(torrent.time_active)}/={str(scoreSeed)}, \
+            Popularity: {str(scorePopularity)}, \
+            Prio: {str(scorePriority)}, \
+            Is Public: {str(scoreIsPublic)}, \
+            Prefer: {str(scorePrefer)}")
             logger.debug(
                 f"{torrent.name} :: Final Score: {str(torrentFinalScore)}")
     logger.debug(f"Data update, torrent scored : \n" + str(torrentData))
@@ -166,7 +191,7 @@ def countdown(t):
 
 
 def confirmInput(question, default="no"):
-    
+
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
     if default is None:
@@ -228,7 +253,8 @@ if __name__ == '__main__':
                 sizeTorrent = int(torrentWithHighScore[2])
                 if cfg["safe"]:
                     named_tuple = time.localtime()  # get struct_time
-                    time_string = time.strftime("%Y-%m-%d,%H:%M:%S", named_tuple)
+                    time_string = time.strftime(
+                        "%Y-%m-%d,%H:%M:%S", named_tuple)
                     question = f'SAFE  ::  {time_string},000 - __main__ - {Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
                     answer = confirmInput(question, default="no")
                     if not answer:
