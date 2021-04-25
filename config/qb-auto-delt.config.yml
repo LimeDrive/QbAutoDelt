@@ -4,7 +4,7 @@
 qbt_log:
   qbt_host: "127.0.0.1:8080"
   qbt_user: "admin"
-  qbt_pass: "adminadmin" 
+  qbt_pass: "adminadmin"
 
 ##
 ##    /!\ Configuration de la méthode de controle de l'espace disque et déclanchement de la suppréssion /!\
@@ -39,13 +39,20 @@ interval: 15
 
 ## Paramètres pour le tri et la sélection des torrents à supprimer en priorité :
 
-t_statistique:
-  min_SeedTime: 80 # A exprimer en heures
-  min_Ratio: 0 # Ratio O = null
+
+min_SeedTime: 80 # A exprimer en heures
 
 ## Automatique Public Tracker Priority with ignore seeding time condition.
 
 publicPriority: True
+
+## Nombre minimum de seeder sur les torrent a supprimé
+
+countSeeder: 8
+
+## Ratio minimum pour les torrent a supprimé
+
+min_Ratio: 0 # Ratio O = null
 
 ## Les Tags aka étiquette (dans qBt) qui permettrons de faire passer un torrent en priorité, de le favoriser ou de l'exlure.
 

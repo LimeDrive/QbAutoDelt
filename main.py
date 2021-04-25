@@ -105,6 +105,14 @@ def listContains(List1, List2):
         else:
             return False
         
+def forLoggSortedDict(dict1):
+    sortedDict = sorted(dict1.items(), key=lambda item: item[1], reverse=True)
+    itemCount = 0
+    for item in sortedDict:
+        itemCount = itemCount + 1
+        logger.debug(f"Torrent {str(itemCount)} :: {item} ")
+    # backTodict = {k: v for k, v in sortedDict}
+        
 # Return True if the torrent are to Exclud
 
 
@@ -113,8 +121,10 @@ def excludTorrent(torrent):
     excludTags = cfg["t_tags"]["exclud"]
     excludCats = cfg["t_cats"]["exclud"]
     excludStates = cfg["t_states"]["states"]
+    excludSeederCountLimit = cfg["countSeeder"]
     publicInPriority = cfg["publicPriority"]
-    minTime = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
+    minTime = cfg["min_SeedTime"] * 60 * 60
+    minRatio = cfg["min_Ratio"]
     trackerPublic = convertTolist(torrent.tracker)
     trackerCount = 1 if not trackerPublic else len(trackerPublic)
 
@@ -127,13 +137,17 @@ def excludTorrent(torrent):
         return True
     elif torrent.state in excludStates:
         return True
+    elif torrent.num_complete < excludSeederCountLimit:
+        return True
+    elif torrent.ratio <= minRatio:
+        return True
 
 # Torrent scorring algo
 
 
 def scoreTorrent():
 
-    minTime = cfg["t_statistique"]["min_SeedTime"] * 60 * 60
+    minTime = cfg["min_SeedTime"] * 60 * 60
     tagsPriority = cfg["t_tags"]["priority"]
     categoryPriority = cfg["t_cats"]["priority"]
     tagsPrefer = cfg["t_tags"]["prefer"]
@@ -151,7 +165,7 @@ def scoreTorrent():
         if not torrentToExclud:
             scoreSeed = round(torrent.time_active / 60 / 60 / 24 * 0.2, 2)
             scoreRatio = round(torrent.ratio, 2)
-            scorePopularity = torrent.num_complete * 0.07
+            scorePopularity = round(torrent.num_complete * 0.1)
             scoreIsPublic = 10000 if publicInPriority is True else 0
             scorePriority = 1000 if listContains(convertTolist(torrent.tags), tagsPriority) is True else 1000 if listContains(
                 convertTolist(torrent.category), categoryPriority) is True else 0
@@ -162,12 +176,7 @@ def scoreTorrent():
                 (scoreSeed, scoreRatio, scorePriority, scorePrefer, scoreIsPublic, scorePopularity), 10)
             torrentData[torrentInfo] = torrentFinalScore
             logger.debug(
-                f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, \
-            SeedTime: {str(torrent.time_active)}/={str(scoreSeed)}, \
-            Popularity: {str(scorePopularity)}, \
-            Prio: {str(scorePriority)}, \
-            Is Public: {str(scoreIsPublic)}, \
-            Prefer: {str(scorePrefer)}")
+                f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, SeedTime: {str(torrent.time_active)}/={str(scoreSeed)}, Popularity: {str(scorePopularity)}, Prio: {str(scorePriority)}, Is Public: {str(scoreIsPublic)}, Prefer: {str(scorePrefer)}")
             logger.debug(
                 f"{torrent.name} :: Final Score: {str(torrentFinalScore)}")
     logger.debug(f"Data update, torrent scored : \n" + str(torrentData))
@@ -239,7 +248,7 @@ if __name__ == '__main__':
     while True:
 
         qbt = qBitConnection(logger, cfg)
-        # scoreTorrent()  # for test propose
+        # forLoggSortedDict(scoreTorrent())  # for test propose
         ctrlState = diskUsageByGiB(
         ) if cfg["ControlMethode"] is True else diskUsageByPercent()
         if ctrlState:
