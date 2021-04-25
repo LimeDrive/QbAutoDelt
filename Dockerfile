@@ -2,11 +2,11 @@ FROM python:3.9-slim-buster
 
 WORKDIR /qb-auto-delt
 
+RUN pip install --upgrade pip
+RUN pip install --upgrade setuptools
 COPY requirements.txt requirements.txt
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 
 COPY . .
-
-ENV VERIFY_WEBUI_CERTIFICATE=False
 
 CMD ["python3", "main.py"]
