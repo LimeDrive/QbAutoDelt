@@ -29,9 +29,9 @@ diskUsageByPercent:
 diskUsageByGiB:
   val: 30
 
-## Safe mode: Mode de sécurité, prompt l'utilisateur pour une confirmation de suppression du torrent.
+## Safe mode mettre True pour: Mode de sécurité, il prompt l'utilisateur pour une confirmation de suppression du torrent.
 
-safe: True
+safe: False # False
 
 ## Intervalle entre les exécutions du programme en minute
 
@@ -42,13 +42,13 @@ interval: 15
 
 min_SeedTime: 80 # A exprimer en heures
 
-## Automatique Public Tracker Priority with ignore seeding time condition.
+## Automatique Public Tracker Priority with ignore seeding time condition. Buggy for lower api Version
 
 publicPriority: True
 
 ## Nombre minimum de seeder sur les torrent a supprimé
 
-countSeeder: 8
+countSeeder: 12
 
 ## Ratio minimum pour les torrent a supprimé
 
@@ -66,14 +66,7 @@ t_tags:
   exclud:
     - "DONOT"
     - "PERSO"
-t_states:
-  states:
-    - "checkingDL"
-    - "allocating"
-    - "checkingResumeData"
-    - "downloading"
-    - "metaDL"
-    - "moving"
+
 t_cats:
   priority:
     - "PUBLIC"
@@ -84,6 +77,18 @@ t_cats:
   exclud:
     - "DONOT"
     - "PERSO"
+
+## Etat du torrent a exclure
+
+t_states:
+  states:
+    - "checkingDL"
+    - "allocating"
+    - "checkingResumeData"
+    - "downloading"
+    - "metaDL"
+    - "moving"
+
 
 ## Discord, droit etre activé avec True et l'url du webhook pour les notification :
 
