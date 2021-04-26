@@ -2,7 +2,7 @@
 ## Identifiant pour la webUI de qBittorrent :
 
 qbt_log:
-  qbt_host: "127.0.0.1:8080"
+  qbt_host: "localhost:8080"
   qbt_user: "admin"
   qbt_pass: "adminadmin"
 
@@ -31,7 +31,7 @@ diskUsageByGiB:
 
 ## Safe mode mettre True pour: Mode de sécurité, il prompt l'utilisateur pour une confirmation de suppression du torrent.
 
-safe: False # False
+safe: True # False
 
 ## Intervalle entre les exécutions du programme en minute
 
@@ -95,3 +95,8 @@ t_states:
 discord:
   use: True # True = Yes, False = Non
   webhook: "https://discord.com/api/webhooks/834590737935892500/Hq0KEvTzYJcU58VamGynQtfURoSVCZ3BfyVV2bnVn7Ui-xbIISpExmpKOH5DPMPo42-5"
+
+
+## Fixe For qBitorrent-NoX Api version
+
+fix: True

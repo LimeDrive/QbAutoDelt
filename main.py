@@ -139,16 +139,26 @@ def excludTorrent(torrent):
         return True
     elif torrent.time_active < minTime:
         return True
-    
+
+
 def excludPublicTorrent(torrent):
     # trackerPublic = convertTolist(torrent.tracker)
     # trackerCount = 1 if not trackerPublic else len(trackerPublic) For API 2.2
-    trackerCount = torrent.trackers_count
+    trackerCount = fixFoxDispAPI(torrent)
     publicInPriority = cfg["publicPriority"]
     
     if not (trackerCount == 1 and publicInPriority is True ):
         if torrent.time_active > 1800:
             return True
+
+
+def fixFoxDispAPI(torrent):
+    if not cfg["fix"]:
+        trackerPublic = convertTolist(torrent.tracker)
+        trackerCount = 1 if not trackerPublic else len(trackerPublic)
+    else:
+        trackerCount = torrent.trackers_count
+    return trackerCount
 
 # Torrent scorring func., return dict() none sorted
 
@@ -165,7 +175,7 @@ def scoreTorrent():
     for torrent in qbt.torrents_info():
         # trackerPublic = convertTolist(torrent.tracker)
         # trackerCount = 1 if not trackerPublic else len(trackerPublic)
-        trackerCount = torrent.trackers_count
+        trackerCount = fixFoxDispAPI(torrent)
         publicInPriority = excludPublicTorrent(torrent)
         # logger.debug(torrent)
         torrentToExclud = True if not (excludTorrent(torrent) is True and publicInPriority is True) else False
