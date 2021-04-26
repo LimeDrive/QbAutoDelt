@@ -9,8 +9,7 @@ import os
 import sys
 import humanize
 import qbittorrentapi
-import logging
-import logging.config
+import logging, logging.config
 from colorama import Fore, Style, init
 from discordwebhook import Discord
 from tenacity import retry, stop_after_attempt, after_log, wait_fixed
@@ -18,7 +17,9 @@ from tenacity import retry, stop_after_attempt, after_log, wait_fixed
 # Logging Consol + File
 os.makedirs("log", exist_ok=True)
 logging.config.fileConfig('config/logging.conf')
-logger = logging.getLogger(__name__)
+logger_globale = logging.getLogger(__name__)
+logger = logging.getLogger("qbAutoDelt")
+listlog = logging.getLogger('torrentSelection')
 init(autoreset=True)
 
 # Qbittorrent API conection.
@@ -111,7 +112,7 @@ def forLoggSortedDict(dict1):
     itemCount = 0
     for item in sortedDict:
         itemCount = itemCount + 1
-        logger.debug(f"Torrent {str(itemCount)} :: {item} ")
+        listlog.info(f"Torrent {str(itemCount)} :: {item} ")
     # backTodict = {k: v for k, v in sortedDict}
         
 # Exclud func. : Return True if the torrent are to Exclud
@@ -128,7 +129,7 @@ def excludTorrent(torrent):
     minRatio = cfg["min_Ratio"]
     trackerPublic = convertTolist(torrent.tracker)
     trackerCount = 1 if not trackerPublic else len(trackerPublic)
-
+    listlog.debug(f"Torrent : {torrent} ")
     if torrent.time_active < minTime:
         if not (trackerCount > 1 and publicInPriority is True):
             return True
@@ -162,7 +163,7 @@ def scoreTorrent():
             trackerCount > 1 and torrent.time_active > 3600 and cfg["publicPriority"] is True) else False
         # logger.debug(torrent)
         torrentToExclud = excludTorrent(torrent)
-        # logger.debug(f"{torrent.name} :: to exclud : {torrentToExclud}")
+        listlog.debug(f"{torrent.name} :: to exclud : {torrentToExclud}")
         if not torrentToExclud:
             scoreSeed = round(torrent.time_active / 60 / 60 / 24 * 0.2, 2)
             scoreRatio = round(torrent.ratio, 2)
@@ -176,9 +177,9 @@ def scoreTorrent():
             torrentFinalScore = sum(
                 (scoreSeed, scoreRatio, scorePriority, scorePrefer, scoreIsPublic, scorePopularity), 10)
             torrentData[torrentInfo] = torrentFinalScore
-            logger.debug(
+            listlog.debug(
                 f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, SeedTime: {str(torrent.time_active)}/={str(scoreSeed)}, Popularity: {str(scorePopularity)}, Prio: {str(scorePriority)}, Is Public: {str(scoreIsPublic)}, Prefer: {str(scorePrefer)}")
-            logger.debug(
+            listlog.debug(
                 f"{torrent.name} :: Final Score: {str(torrentFinalScore)}")
     # logger.debug(f"Data update, torrent scored :" + str(torrentData))
     return torrentData
@@ -193,7 +194,7 @@ def countdown(t):
         named_tuple = time.localtime()  # get struct_time
         time_string = time.strftime("%Y-%m-%d,%H:%M:%S", named_tuple)
         timer = '{:02d}:{:02d}'.format(mins, secs)
-        print(f"INFO  ::  {time_string},000 - __main__ - {Fore.CYAN}Script will recheck your disk space in - {timer} - minute{Style.RESET_ALL}", end="\r")
+        print(f"INFO  ::  {time_string},000 - qbAutoDelt - {Fore.CYAN}Script will recheck your disk space in - {timer} - minute{Style.RESET_ALL}", end="\r")
         time.sleep(1)
         t -= 1
 
@@ -247,15 +248,14 @@ if __name__ == '__main__':
 
     # Main loop
     while True:
-
         qbt = qBitConnection(logger, cfg)
-        # forLoggSortedDict(scoreTorrent())  # for test propose
         ctrlState = diskUsageByGiB(
         ) if cfg["ControlMethode"] is True else diskUsageByPercent()
         if ctrlState:
             logger.debug(f"Control of ctrlState value : {ctrlState}")
             time.sleep(3)
             dataScored = scoreTorrent()
+            forLoggSortedDict(dataScored)
             totalRemove = 0
             # Deleting loop
             while totalRemove < ctrlState:
@@ -265,7 +265,7 @@ if __name__ == '__main__':
                     named_tuple = time.localtime()  # get struct_time
                     time_string = time.strftime(
                         "%Y-%m-%d,%H:%M:%S", named_tuple)
-                    question = f'SAFE  ::  {time_string},000 - __main__ - {Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
+                    question = f'SAFE  ::  {time_string},000 - qbAutoDelt - {Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
                     answer = confirmInput(question, default="no")
                     if not answer:
                         logger.debug(f'Value of user answer are : {answer}')
