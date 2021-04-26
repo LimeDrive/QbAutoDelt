@@ -9,8 +9,7 @@ import os
 import sys
 import humanize
 import qbittorrentapi
-import logging
-import logging.config
+import logging, logging.config
 from colorama import Fore, Style, init
 from discordwebhook import Discord
 from tenacity import retry, stop_after_attempt, after_log, wait_fixed
@@ -18,7 +17,9 @@ from tenacity import retry, stop_after_attempt, after_log, wait_fixed
 # Logging Consol + File
 os.makedirs("log", exist_ok=True)
 logging.config.fileConfig('config/logging.conf')
-logger = logging.getLogger(__name__)
+logger_globale = logging.getLogger(__name__)
+logger = logging.getLogger("qbAutoDelt")
+listlog = logging.getLogger('torrentSelection')
 init(autoreset=True)
 
 # Qbittorrent API conection.
@@ -39,7 +40,7 @@ def qBitConnection(logger, cfg):
         raise
     return qbt
 
-# Fonction de control disque par GiB, retourn la quantité d'espace en KiB au dessus de la limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas.
+# Func. de control disque par GiB, retourn la quantité d'espace en KiB au dessus de la limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas.
 
 
 def diskUsageByGiB():
@@ -62,7 +63,7 @@ def diskUsageByGiB():
         logger.info(
             f"{Fore.GREEN}Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {round( freeDiskSpace - limitDiskSpace, 2 )} GiB before deleting script process{Style.RESET_ALL}")
 
-# Fonction de control disque par %, retourn la quantité d'espace en KiB au dessus de la limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas
+# Func. de control disque par %, retourn la quantité d'espace en KiB au dessus de la limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas
 
 
 def diskUsageByPercent():
@@ -104,16 +105,17 @@ def listContains(List1, List2):
             return True
         else:
             return False
+
         
 def forLoggSortedDict(dict1):
     sortedDict = sorted(dict1.items(), key=lambda item: item[1], reverse=True)
     itemCount = 0
     for item in sortedDict:
         itemCount = itemCount + 1
-        logger.debug(f"Torrent {str(itemCount)} :: {item} ")
+        listlog.info(f"Torrent {str(itemCount)} :: {item} ")
     # backTodict = {k: v for k, v in sortedDict}
         
-# Return True if the torrent are to Exclud
+# Exclud func. : Return True if the torrent are to Exclud
 
 
 def excludTorrent(torrent):
@@ -127,7 +129,7 @@ def excludTorrent(torrent):
     minRatio = cfg["min_Ratio"]
     trackerPublic = convertTolist(torrent.tracker)
     trackerCount = 1 if not trackerPublic else len(trackerPublic)
-
+    listlog.debug(f"Torrent : {torrent} ")
     if torrent.time_active < minTime:
         if not (trackerCount > 1 and publicInPriority is True):
             return True
@@ -142,7 +144,7 @@ def excludTorrent(torrent):
     elif torrent.ratio <= minRatio:
         return True
 
-# Torrent scorring algo
+# Torrent scorring func., return dict() none sorted
 
 
 def scoreTorrent():
@@ -158,10 +160,10 @@ def scoreTorrent():
         trackerPublic = convertTolist(torrent.tracker)
         trackerCount = 1 if not trackerPublic else len(trackerPublic)
         publicInPriority = True if (
-            trackerCount > 1 and cfg["publicPriority"] is True) else False
-        logger.debug(torrent)
+            trackerCount > 1 and torrent.time_active > 3600 and cfg["publicPriority"] is True) else False
+        # logger.debug(torrent)
         torrentToExclud = excludTorrent(torrent)
-        logger.debug(f" Torrent to exclud : {torrentToExclud}")
+        listlog.debug(f"{torrent.name} :: to exclud : {torrentToExclud}")
         if not torrentToExclud:
             scoreSeed = round(torrent.time_active / 60 / 60 / 24 * 0.2, 2)
             scoreRatio = round(torrent.ratio, 2)
@@ -175,11 +177,11 @@ def scoreTorrent():
             torrentFinalScore = sum(
                 (scoreSeed, scoreRatio, scorePriority, scorePrefer, scoreIsPublic, scorePopularity), 10)
             torrentData[torrentInfo] = torrentFinalScore
-            logger.debug(
+            listlog.debug(
                 f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, SeedTime: {str(torrent.time_active)}/={str(scoreSeed)}, Popularity: {str(scorePopularity)}, Prio: {str(scorePriority)}, Is Public: {str(scoreIsPublic)}, Prefer: {str(scorePrefer)}")
-            logger.debug(
+            listlog.debug(
                 f"{torrent.name} :: Final Score: {str(torrentFinalScore)}")
-    logger.debug(f"Data update, torrent scored : \n" + str(torrentData))
+    # logger.debug(f"Data update, torrent scored :" + str(torrentData))
     return torrentData
 
 # define the countdown func.
@@ -192,7 +194,7 @@ def countdown(t):
         named_tuple = time.localtime()  # get struct_time
         time_string = time.strftime("%Y-%m-%d,%H:%M:%S", named_tuple)
         timer = '{:02d}:{:02d}'.format(mins, secs)
-        print(f"INFO  ::  {time_string},000 - __main__ - {Fore.CYAN}Script will recheck your disk space in - {timer} - minute{Style.RESET_ALL}", end="\r")
+        print(f"INFO  ::  {time_string},000 - qbAutoDelt - {Fore.CYAN}Script will recheck your disk space in - {timer} - minute{Style.RESET_ALL}", end="\r")
         time.sleep(1)
         t -= 1
 
@@ -246,15 +248,14 @@ if __name__ == '__main__':
 
     # Main loop
     while True:
-
         qbt = qBitConnection(logger, cfg)
-        # forLoggSortedDict(scoreTorrent())  # for test propose
         ctrlState = diskUsageByGiB(
         ) if cfg["ControlMethode"] is True else diskUsageByPercent()
         if ctrlState:
             logger.debug(f"Control of ctrlState value : {ctrlState}")
             time.sleep(3)
             dataScored = scoreTorrent()
+            forLoggSortedDict(dataScored)
             totalRemove = 0
             # Deleting loop
             while totalRemove < ctrlState:
@@ -264,7 +265,7 @@ if __name__ == '__main__':
                     named_tuple = time.localtime()  # get struct_time
                     time_string = time.strftime(
                         "%Y-%m-%d,%H:%M:%S", named_tuple)
-                    question = f'SAFE  ::  {time_string},000 - __main__ - {Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
+                    question = f'SAFE  ::  {time_string},000 - qbAutoDelt - {Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
                     answer = confirmInput(question, default="no")
                     if not answer:
                         logger.debug(f'Value of user answer are : {answer}')
@@ -284,7 +285,7 @@ if __name__ == '__main__':
                         content=f'Torrent delete: {torrentWithHighScore[0]}, {humanize.naturalsize(sizeTorrent, binary=True)} free up.', embeds=emb2, username="Qbittorrent")
                 totalRemove = totalRemove + sizeTorrent
                 logger.debug(
-                    f"Total remove space free in the loop: {humanize.naturalsize(totalRemove, binary=True)} sleep 10 second")
+                    f"Total space free in the loop: {humanize.naturalsize(totalRemove, binary=True)} sleep 10 second")
                 del dataScored[torrentWithHighScore]
                 time.sleep(10)
         else:
