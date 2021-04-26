@@ -124,16 +124,10 @@ def excludTorrent(torrent):
     excludCats = cfg["t_cats"]["exclud"]
     excludStates = cfg["t_states"]["states"]
     excludSeederCountLimit = cfg["countSeeder"]
-    publicInPriority = cfg["publicPriority"]
     minTime = cfg["min_SeedTime"] * 60 * 60
     minRatio = cfg["min_Ratio"]
-    trackerPublic = convertTolist(torrent.tracker)
-    trackerCount = 1 if not trackerPublic else len(trackerPublic)
     listlog.debug(f"Torrent : {torrent} ")
-    if torrent.time_active < minTime:
-        if not (trackerCount > 1 and publicInPriority is True):
-            return True
-    elif torrent.tags in excludTags:
+    if torrent.tags in excludTags:
         return True
     elif torrent.category in excludCats:
         return True
@@ -141,8 +135,20 @@ def excludTorrent(torrent):
         return True
     elif torrent.num_complete < excludSeederCountLimit:
         return True
-    elif torrent.ratio <= minRatio:
+    elif torrent.ratio < minRatio:
         return True
+    elif torrent.time_active < minTime:
+        return True
+    
+def excludPublicTorrent(torrent):
+    # trackerPublic = convertTolist(torrent.tracker)
+    # trackerCount = 1 if not trackerPublic else len(trackerPublic) For API 2.2
+    trackerCount = torrent.trackers_count
+    publicInPriority = cfg["publicPriority"]
+    
+    if not (trackerCount == 1 and publicInPriority is True ):
+        if torrent.time_active > 36:
+            return True
 
 # Torrent scorring func., return dict() none sorted
 
@@ -157,12 +163,12 @@ def scoreTorrent():
     torrentData = dict()
 
     for torrent in qbt.torrents_info():
-        trackerPublic = convertTolist(torrent.tracker)
-        trackerCount = 1 if not trackerPublic else len(trackerPublic)
-        publicInPriority = True if (
-            trackerCount > 1 and torrent.time_active > 3600 and cfg["publicPriority"] is True) else False
+        # trackerPublic = convertTolist(torrent.tracker)
+        # trackerCount = 1 if not trackerPublic else len(trackerPublic)
+        trackerCount = torrent.trackers_count
+        publicInPriority = excludPublicTorrent(torrent)
         # logger.debug(torrent)
-        torrentToExclud = excludTorrent(torrent)
+        torrentToExclud = True if not (excludTorrent(torrent) is True and publicInPriority is True) else False
         listlog.debug(f"{torrent.name} :: to exclud : {torrentToExclud}")
         if not torrentToExclud:
             scoreSeed = round(torrent.time_active / 60 / 60 / 24 * 0.2, 2)
