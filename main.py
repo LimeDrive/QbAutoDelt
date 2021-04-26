@@ -147,7 +147,7 @@ def excludPublicTorrent(torrent):
     publicInPriority = cfg["publicPriority"]
     
     if not (trackerCount == 1 and publicInPriority is True ):
-        if torrent.time_active > 36:
+        if torrent.time_active > 1800:
             return True
 
 # Torrent scorring func., return dict() none sorted
