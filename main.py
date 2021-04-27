@@ -145,7 +145,7 @@ def exclud_Torrent(torrent):
         return True
     elif torrent.ratio < minRatio:
         return True
-    elif torrent.time_active < minTime:
+    elif seed_Time_Torrent(torrent) < minTime:
         return True
 
 # Retourn True si le torrent est Public, que le parméttre d'exclusion des Public et sur True,
@@ -159,7 +159,7 @@ def includ_Public_Torrent(torrent):
     publicInPriority = cfg["publicPriority"]
     if publicInPriority:
         if not trackerCount == 1:
-            if torrent.time_active > 1800:
+            if seed_Time_Torrent(torrent) > 1800:
                 return True
 
 # Selection de la méthode pour reconaitre les torrent public en fonction de leur nombre de tracker,
@@ -167,12 +167,25 @@ def includ_Public_Torrent(torrent):
 
 
 def count_Public_Tracker(torrent):
-    if not cfg["fix"]:
+    if cfg["fix"]:
         trackerPublic = convert_To_List(torrent.tracker)
         trackerCount = 1 if not trackerPublic else len(trackerPublic)
     else:
         trackerCount = torrent.trackers_count
     return trackerCount
+
+# Défini le temps de seed du torrent, si le Fix de l'api 2.2 est sur True, utilise le temps actif totale (moin precis car ne prend
+# pas en compte les potentielle temps ou le tracker et offline, ni le temps de téléchargement pour les torrent qui down lentement
+# donc impertaivement prévoir quelque heur de marge dans le réglage pour H&R) 
+# sinon prend le seedTime réel fourni par la nouvelle API
+
+def seed_Time_Torrent(torrent):
+    if cfg["fix"]:
+        SeedTime = torrent.time_active
+    else:
+        SeedTime = torrent.seeding_time
+    return SeedTime
+        
 
 # Détérmine si le torrent est a inclure ou a exclure en fonction des paramétre défini par l'utilisateur,
 # et du Tag donné au torrent.
@@ -227,7 +240,7 @@ def score_Torrent():
         torrentSelection = torrent_To_Includ(torrent)
         listlog.info(f"{torrent.name} :: to exclud : {torrentSelection}")
         if torrentSelection:
-            scoreSeed = round(torrent.time_active / 60 / 60 / 24 * 0.2, 2)
+            scoreSeed = round(seed_Time_Torrent(torrent) / 60 / 60 / 24 * 0.2, 2)
             scoreRatio = round(torrent.ratio, 2)
             scorePopularity = round(torrent.num_complete * 0.1)
             scoreIsPublic = 10000 if publicInPriority is True else 0
@@ -240,7 +253,7 @@ def score_Torrent():
                 (scoreSeed, scoreRatio, scorePriority, scorePrefer, scoreIsPublic, scorePopularity), 10)
             torrentData[torrentInfo] = torrentFinalScore
             listlog.debug(
-                f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, SeedTime: {str(torrent.time_active)}/={str(scoreSeed)}, Popularity: {str(scorePopularity)}, Prio: {str(scorePriority)}, Is Public: {str(scoreIsPublic)}, Prefer: {str(scorePrefer)}")
+                f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, SeedTime: {str(seed_Time_Torrent(torrent))}/={str(scoreSeed)}, Popularity: {str(scorePopularity)}, Prio: {str(scorePriority)}, Is Public: {str(scoreIsPublic)}, Prefer: {str(scorePrefer)}")
             listlog.debug(
                 f"{torrent.name} :: Final Score: {str(torrentFinalScore)}")
     # logger.debug(f"Data update, torrent scored :" + str(torrentData))
