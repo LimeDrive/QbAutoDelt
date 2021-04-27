@@ -27,7 +27,7 @@ init(autoreset=True)
 
 
 @retry(stop=stop_after_attempt(20), after=after_log(logger, logging.WARNING), wait=wait_fixed(20))
-def qBitConnection(logger, cfg):
+def qBit_Connection(logger, cfg):
 
     qbt = qbittorrentapi.Client(
         host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_log"]["qbt_user"], password=cfg["qbt_log"]["qbt_pass"], VERIFY_WEBUI_CERTIFICATE=False)
@@ -45,10 +45,11 @@ def qBitConnection(logger, cfg):
 # limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas.
 
 
-def diskUsageByGiB():
+def disk_Usage_By_GiB():
 
-    logger.debug(f"Control method : diskUsageByGiB select, start calculation")
-    limitDiskSpace = cfg["diskUsageByGiB"]["val"]
+    logger.debug(
+        f"Control method : disk_Usage_By_GiB select, start calculation")
+    limitDiskSpace = cfg["disk_Usage_By_GiB"]["val"]
     infoDisk = qbt.sync.maindata.delta()
     freeDiskSpace = round(
         infoDisk.server_state.free_space_on_disk / 2 ** 30, 2)
@@ -69,13 +70,13 @@ def diskUsageByGiB():
 # defini par l'user si elle est dépassé - ou False si elle ne l'est pas
 
 
-def diskUsageByPercent():
+def disk_Usage_By_Percent():
 
     logger.debug(
-        "Control method : diskUsageByPercent select... :: start calculation")
-    statDisk = psutil.disk_usage(cfg["diskUsageByPercent"]["path"])
+        "Control method : disk_Usage_By_Percent select... :: start calculation")
+    statDisk = psutil.disk_usage(cfg["disk_Usage_By_Percent"]["path"])
     percentDisk = round(statDisk.percent, 1)
-    percentMax = cfg["diskUsageByPercent"]["max"]
+    percentMax = cfg["disk_Usage_By_Percent"]["max"]
     ctrlDisk = True if percentDisk > percentMax else False
 
     if ctrlDisk:
@@ -94,7 +95,7 @@ def diskUsageByPercent():
 # Manage the multipl tags or cat retourn by api
 
 
-def convertTolist(string):
+def convert_To_List(string):
     if string:
         st_list = list(string.split(", "))
         return st_list
@@ -102,7 +103,7 @@ def convertTolist(string):
 # Comapare les liste est retourne un boll True si present et False sinon
 
 
-def listContains(List1, List2):
+def list_Contains(List1, List2):
     if (List1 and List2):
         set1 = set(List1)
         set2 = set(List2)
@@ -114,7 +115,7 @@ def listContains(List1, List2):
 # Transforme un dico en Tuple et le trie en fonction de la valleur de sa clé
 
 
-def forLoggSortedDict(dict1):
+def for_Sorted_Dict(dict1):
     sortedDict = sorted(dict1.items(), key=lambda item: item[1], reverse=True)
     itemCount = 0
     for item in sortedDict:
@@ -125,7 +126,7 @@ def forLoggSortedDict(dict1):
 # Retourn True si un torrent a un tag ou des condition d'exclusion dans les paramettres
 
 
-def excludTorrent(torrent):
+def exclud_Torrent(torrent):
 
     excludTags = cfg["t_tags"]["exclud"]
     excludCats = cfg["t_cats"]["exclud"]
@@ -151,23 +152,23 @@ def excludTorrent(torrent):
 # et que le torrent est en seed depuis plus de 30 min
 
 
-def includPublicTorrent(torrent):
-    # trackerPublic = convertTolist(torrent.tracker)
+def includ_Public_Torrent(torrent):
+    # trackerPublic = convert_To_List(torrent.tracker)
     # trackerCount = 1 if not trackerPublic else len(trackerPublic) For API 2.2
-    trackerCount = fixFoxDispAPI(torrent)
+    trackerCount = count_Public_Tracker(torrent)
     publicInPriority = cfg["publicPriority"]
     if publicInPriority:
         if not trackerCount == 1:
-            if torrent.time_active > 18:
+            if torrent.time_active > 1800:
                 return True
 
 # Selection de la méthode pour reconaitre les torrent public en fonction de leur nombre de tracker,
 # l'api du client est en version 2.2 utilise une conversion des tracker en liste pour les compter.
 
 
-def fixFoxDispAPI(torrent):
+def count_Public_Tracker(torrent):
     if not cfg["fix"]:
-        trackerPublic = convertTolist(torrent.tracker)
+        trackerPublic = convert_To_List(torrent.tracker)
         trackerCount = 1 if not trackerPublic else len(trackerPublic)
     else:
         trackerCount = torrent.trackers_count
@@ -177,7 +178,7 @@ def fixFoxDispAPI(torrent):
 # et du Tag donné au torrent.
 
 
-def torrentToInclud(torrent):
+def torrent_To_Includ(torrent):
     """description
 
     Si torrent a exclur return False
@@ -188,20 +189,20 @@ def torrentToInclud(torrent):
     excludTags = cfg["t_tags"]["exclud"]
     excludCats = cfg["t_cats"]["exclud"]
     excludStates = cfg["t_states"]["states"]
-    if listContains(convertTolist(torrent.tags), tagsPriority):
+    if list_Contains(convert_To_List(torrent.tags), tagsPriority):
         return True
-    elif listContains(convertTolist(torrent.category), categoryPriority):
+    elif list_Contains(convert_To_List(torrent.category), categoryPriority):
         return True
-    elif excludTorrent(torrent):
-        if includPublicTorrent(torrent):
-                if torrent.tags in excludTags:
-                    return False
-                elif torrent.category in excludCats:
-                    return False
-                elif torrent.state in excludStates:
-                    return False
-                else:
-                    return True
+    elif exclud_Torrent(torrent):
+        if includ_Public_Torrent(torrent):
+            if torrent.tags in excludTags:
+                return False
+            elif torrent.category in excludCats:
+                return False
+            elif torrent.state in excludStates:
+                return False
+            else:
+                return True
         else:
             return False
     else:
@@ -211,7 +212,7 @@ def torrentToInclud(torrent):
 # le noms, le hash et le poid des torrents.
 
 
-def scoreTorrent():
+def score_Torrent():
 
     minTime = cfg["min_SeedTime"] * 60 * 60
     tagsPriority = cfg["t_tags"]["priority"]
@@ -221,19 +222,19 @@ def scoreTorrent():
     torrentData = dict()
 
     for torrent in qbt.torrents_info():
-        trackerCount = fixFoxDispAPI(torrent)
-        publicInPriority = includPublicTorrent(torrent)
-        torrentSelection = torrentToInclud(torrent)
+        trackerCount = count_Public_Tracker(torrent)
+        publicInPriority = includ_Public_Torrent(torrent)
+        torrentSelection = torrent_To_Includ(torrent)
         listlog.info(f"{torrent.name} :: to exclud : {torrentSelection}")
         if torrentSelection:
             scoreSeed = round(torrent.time_active / 60 / 60 / 24 * 0.2, 2)
             scoreRatio = round(torrent.ratio, 2)
             scorePopularity = round(torrent.num_complete * 0.1)
             scoreIsPublic = 10000 if publicInPriority is True else 0
-            scorePriority = 1000 if listContains(convertTolist(torrent.tags), tagsPriority) is True else 1000 if listContains(
-                convertTolist(torrent.category), categoryPriority) is True else 0
-            scorePrefer = 200 if listContains(convertTolist(torrent.tags), tagsPrefer) is True else 200 if listContains(
-                convertTolist(torrent.category), categoryPrefer) is True else 0
+            scorePriority = 1000 if list_Contains(convert_To_List(torrent.tags), tagsPriority) is True else 1000 if list_Contains(
+                convert_To_List(torrent.category), categoryPriority) is True else 0
+            scorePrefer = 200 if list_Contains(convert_To_List(torrent.tags), tagsPrefer) is True else 200 if list_Contains(
+                convert_To_List(torrent.category), categoryPrefer) is True else 0
             torrentInfo = (torrent.name, torrent.hash, torrent.size)
             torrentFinalScore = sum(
                 (scoreSeed, scoreRatio, scorePriority, scorePrefer, scoreIsPublic, scorePopularity), 10)
@@ -263,7 +264,7 @@ def countdown(t):
 # Prompt confirmation [y/n]
 
 
-def confirmInput(question, default="no"):
+def confirm_Input(question, default="no"):
 
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
@@ -307,14 +308,14 @@ if __name__ == '__main__':
 
     # Main loop
     while True:
-        qbt = qBitConnection(logger, cfg)
-        ctrlState = diskUsageByGiB(
-        ) if cfg["ControlMethode"] is True else diskUsageByPercent()
+        qbt = qBit_Connection(logger, cfg)
+        ctrlState = disk_Usage_By_GiB(
+        ) if cfg["ControlMethode"] is True else disk_Usage_By_Percent()
         if ctrlState:
             logger.debug(f"Control of ctrlState value : {ctrlState}")
             time.sleep(3)
-            dataScored = scoreTorrent()
-            forLoggSortedDict(dataScored)
+            dataScored = score_Torrent()
+            for_Sorted_Dict(dataScored)
             totalRemove = 0
             # Deleting loop
             while totalRemove < ctrlState:
@@ -325,7 +326,7 @@ if __name__ == '__main__':
                     time_string = time.strftime(
                         "%Y-%m-%d,%H:%M:%S", named_tuple)
                     question = f'SAFE  ::  {time_string},000 - qbAutoDelt - {Fore.YELLOW}{Style.BRIGHT}Remove: {Fore.WHITE}{torrentWithHighScore[0]}, {Fore.RED}{humanize.naturalsize(sizeTorrent, binary=True)}{Style.RESET_ALL}'
-                    answer = confirmInput(question, default="no")
+                    answer = confirm_Input(question, default="no")
                     if not answer:
                         logger.debug(f'Value of user answer are : {answer}')
                         logger.info(
