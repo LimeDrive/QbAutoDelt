@@ -17,7 +17,7 @@ from tenacity import retry, stop_after_attempt, after_log, wait_fixed
 
 # Logging Consol + File
 os.makedirs("log", exist_ok=True)
-logging.config.fileConfig('config/logging.conf')
+logging.config.fileConfig('logging.conf')
 logger_globale = logging.getLogger(__name__)
 logger = logging.getLogger("qbAutoDelt")
 listlog = logging.getLogger('torrentSelection')
