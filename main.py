@@ -9,7 +9,8 @@ import os
 import sys
 import humanize
 import qbittorrentapi
-import logging, logging.config
+import logging
+import logging.config
 from colorama import Fore, Style, init
 from discordwebhook import Discord
 from tenacity import retry, stop_after_attempt, after_log, wait_fixed
@@ -22,7 +23,7 @@ logger = logging.getLogger("qbAutoDelt")
 listlog = logging.getLogger('torrentSelection')
 init(autoreset=True)
 
-# Qbittorrent API conection.
+# Connection a l'api de qBit, en cas d'echec retente 20 fois avec un delay de 20 seconds avant de down le script.
 
 
 @retry(stop=stop_after_attempt(20), after=after_log(logger, logging.WARNING), wait=wait_fixed(20))
@@ -40,7 +41,8 @@ def qBitConnection(logger, cfg):
         raise
     return qbt
 
-# Func. de control disque par GiB, retourn la quantité d'espace en KiB au dessus de la limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas.
+# Func. de control disque par GiB, retourn la quantité d'espace en KiB au dessus de la
+# limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas.
 
 
 def diskUsageByGiB():
@@ -63,7 +65,8 @@ def diskUsageByGiB():
         logger.info(
             f"{Fore.GREEN}Disk Space at {humanize.naturalsize(infoDisk.server_state.free_space_on_disk, binary=True)} - Your allow to fill up {round( freeDiskSpace - limitDiskSpace, 2 )} GiB before deleting script process{Style.RESET_ALL}")
 
-# Func. de control disque par %, retourn la quantité d'espace en KiB au dessus de la limit defini par l'user si elle est dépassé - ou False si elle ne l'est pas
+# Func. de control disque par %, retourn la quantité d'espace en KiB au dessus de la limit
+# defini par l'user si elle est dépassé - ou False si elle ne l'est pas
 
 
 def diskUsageByPercent():
@@ -87,14 +90,16 @@ def diskUsageByPercent():
     else:
         logger.info(
             f"{Fore.GREEN}Disk Space use at {str(percentDisk)}% - Your allow to fill up {str(round(percentMax - percentDisk,2))} % before deleting script process{Style.RESET_ALL}")
-    
-# Some Goody to manage the multipl tags or cat retourn by api 
+
+# Manage the multipl tags or cat retourn by api
 
 
 def convertTolist(string):
     if string:
         st_list = list(string.split(", "))
         return st_list
+
+# Comapare les liste est retourne un boll True si present et False sinon
 
 
 def listContains(List1, List2):
@@ -106,7 +111,9 @@ def listContains(List1, List2):
         else:
             return False
 
-        
+# Transforme un dico en Tuple et le trie en fonction de la valleur de sa clé
+
+
 def forLoggSortedDict(dict1):
     sortedDict = sorted(dict1.items(), key=lambda item: item[1], reverse=True)
     itemCount = 0
@@ -114,8 +121,8 @@ def forLoggSortedDict(dict1):
         itemCount = itemCount + 1
         listlog.info(f"Torrent {str(itemCount)} :: {item} ")
     # backTodict = {k: v for k, v in sortedDict}
-        
-# Exclud func. : Return True if the torrent are to Exclud
+
+# Retourn True si un torrent a un tag ou des condition d'exclusion dans les paramettres
 
 
 def excludTorrent(torrent):
@@ -140,16 +147,22 @@ def excludTorrent(torrent):
     elif torrent.time_active < minTime:
         return True
 
+# Retourn True si le torrent est Public, que le parméttre d'exclusion des Public et sur True,
+# et que le torrent est en seed depuis plus de 30 min
 
-def excludPublicTorrent(torrent):
+
+def includPublicTorrent(torrent):
     # trackerPublic = convertTolist(torrent.tracker)
     # trackerCount = 1 if not trackerPublic else len(trackerPublic) For API 2.2
     trackerCount = fixFoxDispAPI(torrent)
     publicInPriority = cfg["publicPriority"]
-    
-    if not (trackerCount == 1 and publicInPriority is True ):
-        if torrent.time_active > 1800:
-            return True
+    if publicInPriority:
+        if not trackerCount == 1:
+            if torrent.time_active > 18:
+                return True
+
+# Selection de la méthode pour reconaitre les torrent public en fonction de leur nombre de tracker,
+# l'api du client est en version 2.2 utilise une conversion des tracker en liste pour les compter.
 
 
 def fixFoxDispAPI(torrent):
@@ -160,7 +173,42 @@ def fixFoxDispAPI(torrent):
         trackerCount = torrent.trackers_count
     return trackerCount
 
-# Torrent scorring func., return dict() none sorted
+# Détérmine si le torrent est a inclure ou a exclure en fonction des paramétre défini par l'utilisateur,
+# et du Tag donné au torrent.
+
+
+def torrentToInclud(torrent):
+    """description
+
+    Si torrent a exclur return False
+    Si torrent a inclur return True
+    """
+    tagsPriority = cfg["t_tags"]["priority"]
+    categoryPriority = cfg["t_cats"]["priority"]
+    excludTags = cfg["t_tags"]["exclud"]
+    excludCats = cfg["t_cats"]["exclud"]
+    excludStates = cfg["t_states"]["states"]
+    if listContains(convertTolist(torrent.tags), tagsPriority):
+        return True
+    elif listContains(convertTolist(torrent.category), categoryPriority):
+        return True
+    elif excludTorrent(torrent):
+        if includPublicTorrent(torrent):
+                if torrent.tags in excludTags:
+                    return False
+                elif torrent.category in excludCats:
+                    return False
+                elif torrent.state in excludStates:
+                    return False
+                else:
+                    return True
+        else:
+            return False
+    else:
+        return True
+
+# Scrore les torrent qui passe tout les test d'inclusion, et retourn un dico avec le score trouvez,
+# le noms, le hash et le poid des torrents.
 
 
 def scoreTorrent():
@@ -173,14 +221,11 @@ def scoreTorrent():
     torrentData = dict()
 
     for torrent in qbt.torrents_info():
-        # trackerPublic = convertTolist(torrent.tracker)
-        # trackerCount = 1 if not trackerPublic else len(trackerPublic)
         trackerCount = fixFoxDispAPI(torrent)
-        publicInPriority = excludPublicTorrent(torrent)
-        # logger.debug(torrent)
-        torrentToExclud = True if not (excludTorrent(torrent) is True and publicInPriority is True) else False
-        listlog.debug(f"{torrent.name} :: to exclud : {torrentToExclud}")
-        if not torrentToExclud:
+        publicInPriority = includPublicTorrent(torrent)
+        torrentSelection = torrentToInclud(torrent)
+        listlog.info(f"{torrent.name} :: to exclud : {torrentSelection}")
+        if torrentSelection:
             scoreSeed = round(torrent.time_active / 60 / 60 / 24 * 0.2, 2)
             scoreRatio = round(torrent.ratio, 2)
             scorePopularity = round(torrent.num_complete * 0.1)
@@ -200,7 +245,8 @@ def scoreTorrent():
     # logger.debug(f"Data update, torrent scored :" + str(torrentData))
     return torrentData
 
-# define the countdown func.
+# define the countdown func. Petit goody qui a l'aire de foutre plus le bordel
+# qu'autre chose sur docker ^^ mais sa sa clac en console
 
 
 def countdown(t):
@@ -258,9 +304,6 @@ if __name__ == '__main__':
              "title": "Disk space Control"}]
     emb2 = [{"url": "https://github.com/LimeDrive/qb-auto-delt",
              "title": "Torrents Delete"}]
-
-    # Try to establish Qbittorrent connection
-    # qbt = qBitConnection(logger, cfg)
 
     # Main loop
     while True:
