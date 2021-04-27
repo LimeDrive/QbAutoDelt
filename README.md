@@ -22,6 +22,36 @@ Le script à pour l'instant vocation à tourner dans un environnement python doc
 
 The script is for the moment intended to run in a dockerized python environment.
 
+---
+# Instalation
+
+- Créé un repertoire config/ et un répertoir log/ qui vont étre monté sur votre docker.
+
+- Récupérer le fichier de config *qb-auto-delt.config.yml* a placé dans :`/config`
+
+    `curl -LJO https://raw.githubusercontent.com/LimeDrive/qb-auto-delt/master/config/qb-auto-delt.config.yml`
+
+- L'éditer pour l'adapté avec vos préférance
+
+- Run votre docker avec compose en montant les volumes /log et /config
+
+Exemple de docker compose :
+
+```yaml
+version: "3.9"
+services:
+
+    QbAutoDelt:
+        container_name: qbautodelt
+        image: limedrive/qbautodelt:latest
+        environment:
+            - PYTHON_QBITTORRENTAPI_DO_NOT_VERIFY_WEBUI_CERTIFICATE: True
+        volumes:
+            - 'path/to/config/:/qb-auto-delt/config'
+            - 'path/to/log:/qb-auto-delt/log'
+        restart: unless-stopped
+```
+
 ## Configuration :
 
 Pour configuré vos préférance édité le fichier : 
