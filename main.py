@@ -30,7 +30,7 @@ init(autoreset=True)
 def qBit_Connection(logger, cfg):
 
     qbt = qbittorrentapi.Client(
-        host=cfg["qbt_log"]["qbt_host"], username=cfg["qbt_log"]["qbt_user"], password=cfg["qbt_log"]["qbt_pass"], VERIFY_WEBUI_CERTIFICATE=False)
+        host=cfg["qBittorrent"]["host"], username=cfg["qBittorrent"]["user"], password=cfg["qBittorrent"]["password"], VERIFY_WEBUI_CERTIFICATE=False)
     try:
         qbt.auth_log_in()
         logger.info(
@@ -128,9 +128,9 @@ def for_Sorted_Dict(dict1):
 
 def exclud_Torrent(torrent):
 
-    excludTags = cfg["t_tags"]["exclud"]
-    excludCats = cfg["t_cats"]["exclud"]
-    excludStates = cfg["t_states"]["states"]
+    excludTags = cfg["Torrents_Tags"]["exclud"]
+    excludCats = cfg["Torrents_Category"]["exclud"]
+    excludTorrentStatesToExclud = cfg["Torrent_States"]["TorrentStatesToExclud"]
     excludSeederCountLimit = cfg["countSeeder"]
     minTime = cfg["min_SeedTime"] * 60 * 60
     minRatio = cfg["min_Ratio"]
@@ -139,7 +139,7 @@ def exclud_Torrent(torrent):
         return True
     elif torrent.category in excludCats:
         return True
-    elif torrent.state in excludStates:
+    elif torrent.state in excludTorrentStatesToExclud:
         return True
     elif torrent.num_complete < excludSeederCountLimit:
         return True
@@ -184,11 +184,11 @@ def torrent_To_Includ(torrent):
     Si torrent a exclur return False
     Si torrent a inclur return True
     """
-    tagsPriority = cfg["t_tags"]["priority"]
-    categoryPriority = cfg["t_cats"]["priority"]
-    excludTags = cfg["t_tags"]["exclud"]
-    excludCats = cfg["t_cats"]["exclud"]
-    excludStates = cfg["t_states"]["states"]
+    tagsPriority = cfg["Torrents_Tags"]["priority"]
+    categoryPriority = cfg["Torrents_Category"]["priority"]
+    excludTags = cfg["Torrents_Tags"]["exclud"]
+    excludCats = cfg["Torrents_Category"]["exclud"]
+    excludTorrentStatesToExclud = cfg["Torrent_States"]["TorrentStatesToExclud"]
     if list_Contains(convert_To_List(torrent.tags), tagsPriority):
         return True
     elif list_Contains(convert_To_List(torrent.category), categoryPriority):
@@ -199,7 +199,7 @@ def torrent_To_Includ(torrent):
                 return False
             elif torrent.category in excludCats:
                 return False
-            elif torrent.state in excludStates:
+            elif torrent.state in excludTorrentStatesToExclud:
                 return False
             else:
                 return True
@@ -215,10 +215,10 @@ def torrent_To_Includ(torrent):
 def score_Torrent():
 
     minTime = cfg["min_SeedTime"] * 60 * 60
-    tagsPriority = cfg["t_tags"]["priority"]
-    categoryPriority = cfg["t_cats"]["priority"]
-    tagsPrefer = cfg["t_tags"]["prefer"]
-    categoryPrefer = cfg["t_cats"]["prefer"]
+    tagsPriority = cfg["Torrents_Tags"]["priority"]
+    categoryPriority = cfg["Torrents_Category"]["priority"]
+    tagsPrefer = cfg["Torrents_Tags"]["prefer"]
+    categoryPrefer = cfg["Torrents_Category"]["prefer"]
     torrentData = dict()
 
     for torrent in qbt.torrents_info():

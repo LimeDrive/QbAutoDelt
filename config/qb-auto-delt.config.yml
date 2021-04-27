@@ -1,10 +1,10 @@
 ---
 ## Identifiant pour la webUI de qBittorrent :
 
-qbt_log:
-  qbt_host: "localhost:8080"
-  qbt_user: "admin"
-  qbt_pass: "adminadmin"
+qBittorrent:
+  host: 127.0.0.1:8080"
+  user: "admin"
+  password: "adminadmin"
 
 ##
 ##    /!\ Configuration de la méthode de controle de l'espace disque et déclanchement de la suppréssion /!\
@@ -19,15 +19,15 @@ ControlMethode: True # True or False
 ## Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveillé.
 ## Si ControlMethode = False
 
-diskUsageByPercent:
+disk_Usage_By_Percent:
   max: 80
   path: "./"
 
 ## Qantité d'espace disque restante exprimé en GiB qui déclenche la suppression des torrents.
 ## Si ControlMethode = True
 
-diskUsageByGiB:
-  val: 30
+disk_Usage_By_GiB:
+  val: 35
 
 ## Safe mode mettre True pour: Mode de sécurité, il prompt l'utilisateur pour une confirmation de suppression du torrent.
 
@@ -48,7 +48,7 @@ publicPriority: True
 
 ## Nombre minimum de seeder sur les torrent a supprimé
 
-countSeeder: 12
+countSeeder: 30
 
 ## Ratio minimum pour les torrent a supprimé
 
@@ -56,7 +56,7 @@ min_Ratio: 0 # Ratio O = null
 
 ## Les Tags aka étiquette (dans qBt) qui permettrons de faire passer un torrent en priorité, de le favoriser ou de l'exlure.
 
-t_tags:
+Torrents_Tags:
   priority:
     - "PUBLIC"
     - "TODELT"
@@ -67,7 +67,7 @@ t_tags:
     - "DONOT"
     - "PERSO"
 
-t_cats:
+Torrents_Category:
   priority:
     - "PUBLIC"
     - "TODELT"
@@ -78,10 +78,10 @@ t_cats:
     - "DONOT"
     - "PERSO"
 
-## Etat du torrent a exclure
+## Etat des torrent a exclure
 
-t_states:
-  states:
+Torrent_States:
+  TorrentStatesToExclud:
     - "checkingDL"
     - "allocating"
     - "checkingResumeData"
@@ -97,6 +97,6 @@ discord:
   webhook: "https://discord.com/api/webhooks/834590737935892500/Hq0KEvTzYJcU58VamGynQtfURoSVCZ3BfyVV2bnVn7Ui-xbIISpExmpKOH5DPMPo42-5"
 
 
-## Fixe For qBitorrent-NoX Api version
+## Fixe For qBitorrent-NoX Api version if 2.8 set True, if 2.2 set False
 
 fix: True
