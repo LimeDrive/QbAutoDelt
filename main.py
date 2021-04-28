@@ -364,6 +364,11 @@ if __name__ == '__main__':
         else:
             logger.debug(f"Control of ctrlState value : {bool(ctrlState)}")
         interval = cfg['interval']
-        logger.debug(
-            f"{Fore.CYAN}Script will recheck your disk space in - {str(interval)} - minute{Style.RESET_ALL}")
-        countdown(int(interval) * 60)
+        if cfg["countdown"]:
+            logger.debug(
+                f"{Fore.CYAN}Script will recheck your disk space in - {str(interval)} - minute{Style.RESET_ALL}")
+            countdown(int(interval) * 60)
+        else:
+            logger.info(
+                f"{Fore.CYAN}Script will recheck your disk space in - {str(interval)} - minute{Style.RESET_ALL}")
+            time.sleep(int(interval) * 60)

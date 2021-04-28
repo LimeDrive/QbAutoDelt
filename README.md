@@ -1,7 +1,8 @@
-# Qb-auto-delt TESTING
-***Test only with safe env.
+# Qb-auto-delt   ---   ***alpha phase***   ---
+***Test only with safe env.***
+
 Can delete some torrent(s) from your seedbox definitly.
-You're now warned.***
+You're now warned.
 
 **Script/dockerapp** 
 
@@ -47,7 +48,7 @@ services:
         environment:
             - PYTHON_QBITTORRENTAPI_DO_NOT_VERIFY_WEBUI_CERTIFICATE: True
         volumes:
-            - 'path/to/config/:/qb-auto-delt/config'
+            - 'path/to/config/:/qb-auto-delt/config:ro'
             - 'path/to/log:/qb-auto-delt/log'
         restart: unless-stopped
 ```

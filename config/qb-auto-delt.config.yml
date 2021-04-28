@@ -100,3 +100,7 @@ discord:
 ## Fixe For qBitorrent-NoX Api version if 2.2 set True,
 
 fix: False
+
+## CountDown in consol set to False for Docker user
+
+countdown: False
