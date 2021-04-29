@@ -46,6 +46,14 @@ min_SeedTime: 80 # A exprimer en heures
 
 publicPriority: True
 
+## Suppression automatique des torrent tag priority ou public.
+
+autoSupp:
+  public: True
+  priority: True
+  minSeedTime: 2
+
+
 ## Nombre minimum de seeder sur les torrent a supprimé
 
 countSeeder: 30
