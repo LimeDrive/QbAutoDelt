@@ -66,14 +66,14 @@ python3 main.py
 version: "3.9"
 services:
   QbAutoDelt:
-      container_name: qbautodelt
-      image: limedrive/qbautodelt:latest
-      environment:
-        - PYTHON_QBITTORRENTAPI_DO_NOT_VERIFY_WEBUI_CERTIFICATE=true
-      volumes:
-        - 'path/to/config/:/qb-auto-delt/config:ro'
-        - 'path/to/log:/qb-auto-delt/log'
-      restart: unless-stopped
+    container_name: qbautodelt
+    image: limedrive/qbautodelt:latest
+    environment:
+      - PYTHON_QBITTORRENTAPI_DO_NOT_VERIFY_WEBUI_CERTIFICATE=true
+    volumes:
+      - 'path/to/config/:/qb-auto-delt/config:ro'
+      - 'path/to/log:/qb-auto-delt/log'
+    restart: unless-stopped
 ```
 ### Exemple ***docker run*** :
 
