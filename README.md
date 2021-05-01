@@ -31,6 +31,18 @@ ___
 ---
 # Installation
 
+
+- Assuré vous d'avoir Python 3
+- Clone le repo
+- Edité vos préférence et configuration dans qb-auto-delt.config.yml
+- Ouvrir une console au dossier.
+- Install des dépandance et lancé le script :
+```zsh
+pip3 install -r requirements.txt
+python3 main.py
+```
+
+
 ## Docker et docker-compose (recomandé)
 
 ### Création des fichier des répertoires partagé et montage des volumes:
