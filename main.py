@@ -23,10 +23,10 @@ logger = logging.getLogger("qbAutoDelt")
 listlog = logging.getLogger('torrentSelection')
 init(autoreset=True)
 
-# Connection a l'api de qBit, en cas d'echec retente 20 fois avec un delay de 20 seconds avant de down le script.
+# Connection a l'api de qBit, en cas d'echec retente 20 fois avec un delay de 340 seconds avant de down le script.
 
 
-@retry(stop=stop_after_attempt(20), after=after_log(logger, logging.WARNING), wait=wait_fixed(20))
+@retry(stop=stop_after_attempt(20), after=after_log(logger, logging.WARNING), wait=wait_fixed(340))
 def qBit_Connection(logger, cfg):
 
     qbt = qbittorrentapi.Client(
