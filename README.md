@@ -24,42 +24,42 @@ Exceptions are possible thanks to the manual addition of tags on the concerned t
 
 ___
 
->Le script à pour l'instant vocation à tourner dans un environnement python dockerisé sur serveur, mais il est tout a fait possible de ne l'executé qu'une seul foi comme tout script python. 
+>Le script à pour l'instant vocation à tourner dans un environnement python dockerisé sur serveur, mais il est tout a fait possible de ne l'executer qu'une seule fois comme tout script python. 
 
->The script is for the moment intended to run in a dockerized python environment.
+>The script is for the moment intended to run in a dockerized python environment. But he can ben launched in a one shot side.
 
 ---
 # Installation
 
 
-- Assuré vous d'avoir Python 3
-- Clone le repo
-- Edité vos préférence et configuration dans qb-auto-delt.config.yml
-- Ouvrir une console au dossier.
-- Install des dépandance et lancé le script :
+- Assurez vous d'avoir Python 3
+- Clonez le repos git
+- Editez vos préférences et paramétrez votre configuration dans qb-auto-delt.config.yml
+- Ouvrez une console dans le dossier cloné précédemment.
+- Installez les dépandance et lancez le script via les 2 commandes ci-dessous :
 ```zsh
 pip3 install -r requirements.txt
 python3 main.py
 ```
 
 
-## Docker et docker-compose (recomandé)
+## Docker et docker-compose (recommandé)
 
-### Création des fichier des répertoires partagé et montage des volumes:
+### Création des fichier des répertoires partagés et montage des volumes:
 
-* Créé un repertoire **_config/_** et un répertoir **_log/_** qui vont étre monté sur votre docker.
+* Créez un repertoire **_config/_** et un répertoire **_log/_** qui vont être montés dans votre docker.
 
-* Récupérer le fichier yml *qb-auto-delt.config.yml* a placé dans :`/config`
+* Récupérez le fichier yml *qb-auto-delt.config.yml* et placez le dans le dossier :`/config`
 
   >  `curl -LJO https://raw.githubusercontent.com/LimeDrive/qb-auto-delt/master/config/qb-auto-delt.config.yml`
 
-* L'éditer pour l'adapté avec vos préférance
+* Editez le pour l'adapter à votre configuration
 
-* Run votre docker en montant les volumes ainsi dans la commande:
+* Lancez le containeur docker en montant les volumes comme dans l'exemple donné ci-dessous :
     * `-v /PATH/TO/LOCAL/log:/qb-auto-delt/log`
     * `-v /PATH/TO/LOCAL/config:/qb-auto-delt/config:ro`
 
-### Exemple de ***docker-compose*** : _(recomandé)_
+### Exemple avec ***docker-compose*** : _(recommandé)_
 
 ```yml
 ---
@@ -75,7 +75,7 @@ services:
       - 'path/to/log:/qb-auto-delt/log'
     restart: unless-stopped
 ```
-### Exemple ***docker run*** :
+### Exemple avec ***docker run*** :
 
 ```docker
 docker run -d \
@@ -91,14 +91,14 @@ docker run -d \
 
 # Configuration du script:
 
-Pour configuré vos préférance édité le fichier : 
+Pour configurer vos préférences, éditez le fichier : 
 
 **`config/qb-auto-delt.config.yml`**
 
 ___
 
-## Identifiant pour la webUI de qBittorrent :
-- Mettre vos identifant d'acses a la webUI de qbitorrent ici:
+## Identifiants pour la webUI de qBittorrent :
+- Mettez vos identifants d'accès a la webUI de qbitorrent :
 ```yml
 qBittorrent:
   host: "127.0.0.1:8080"
@@ -110,26 +110,26 @@ qBittorrent:
 | **host:** | "127.0.0.1:8080" | \<hostIP>:\<port> |
 | **user:** | "admin" | \<WebUI User Name> |
 | **pass:** | "adminamin" | \<WebUI Password> |
-> Avec votre instalation docker il est possible et conseillé de mettre **qBittorrent** et **Qbautodelt** sur le meme network docker (bridge): Dans se cas renseigner dans le host simplement l'adresse local de votre docker et le port exemple : ***"qbittorrent:8080"***
+> Avec votre installation docker, il est possible et conseillé de mettre les containeurs **qBittorrent** et **Qbautodelt** sur le même network docker (bridge): Pour faire cela, renseignez dans le host l'adresse locale de votre docker et le port de la manière suivante : ***"qbittorrent:8080"***
 
 ___
 
-## Configuration de la méthode de controle de l'espace disque et déclanchement de la suppréssion:
-- Le script propose deux méthode de controle de l'espace diques restant qui déclanche sa suppression, le contol par % ne dépend pas de l'api de qbittorrent.
-> Seul True n'est disponible si vous utilisé ce script pour une instance distante (ex: Seedbox)
-> il est conseillé d'utilisé True en docker également, sans quoi vous aurai besoin de monter en volume, votre dossier de téléchargement afin que le script puisse calculé a l'espace disque
+## Configuration de la méthode de contrôle de l'espace disque et déclanchement de la suppression:
+- Le script propose deux méthode de contrôle de l'espace dique restant qui déclenche la/les suppression(s), le contrôle par pourcentage ne dépend pas de l'api de qbittorrent.
+> Seul True est disponible si vous utilisez ce script pour une instance distante (ex: Seedbox)
+> il est conseillé d'utiliser True en docker également, sans quoi vous aurez besoin de monter en volume, votre dossier de téléchargement afin que le script puisse calculer  l'espace disque restant
 
 ```yml
 ControlMethode: True
 ```
 | Options | Methode | Description |
 |:------|------|--------|
-| **True** | GiB |Déclanchement de la suppréssion quand il ne reste que xx GiB d'espace libre sur votre disque |
-| **False** | % |Déclanchement de la suppréssion quand vous dépassé XX % d'espace disque |
+| **True** | GiB |Déclenchement de la suppression quand il ne reste plus que xx GiB d'espace libre sur votre disque |
+| **False** | % |Déclenchement de la suppression quand vous dépassez un certain taux d'occupation de l'espace disque disponible (%) |
 
-### **Réglages des option inérante a la méthode de contrôle :**
+### **Réglages des options inérantes a la méthode de contrôle :**
 > Si **ControlMethode: False**
-- Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveillé.
+- Pourcentage d'espace disque qui déclenche la suppression des torrents et path du disque a surveiller.
 ```yml
 disk_Usage_By_Percent:
   max: 80
@@ -137,45 +137,45 @@ disk_Usage_By_Percent:
 ```
 | Options | Exemples | Description |
 |:------|------|--------|
-| **max:** | 80 | limite en % d'espace disque avant le déclanchement du script de supréssion |
-| **path:** | "./" | Path a surveillé, peut etre la racine de votre partition, ou le path de votre montage du dossier de téléchargement si vous utilisé docker. |
+| **max:** | 80 | Limite en % d'espace disque avant le déclenchement du script de supression |
+| **path:** | "./" | Path a surveiller, ce peut être la racine de votre partition, ou le path de votre montage du dossier de téléchargement si vous utilisez docker. |
 
-### **Qantité d'espace disque restante exprimé en GiB qui déclenche la suppression des torrents.**
+### **Qantité d'espace disque restante exprimée en GiB qui déclenche la suppression des torrents.**
 > Si **ControlMethode: True**
-- Paramétrage de la limite de quantité d'espace disque restant qui déclenche la suppression des torrents:
+- Paramétrage de la valeur minimale d'espace disque restant qui déclenche la suppression des torrents:
 ```yml
 disk_Usage_By_GiB:
   val: 35
 ```
 | Options | Exemples | Description |
 |:------|------|--------|
-| **val:** | 35 | limite en GiB d'espace disque restant avant le déclanchement du script de supréssion |
+| **val:** | 35 | limite en GiB d'espace disque restant avant le déclenchement du script de suppression |
 
-## **Mode Sécurisé : (utile pour testé vos réglage)**
-- Mode de sécurité, il prompt l'utilisateur pour une confirmation de suppression du torrent.
-> Utilisable uniquement si vous lancé le script sans docker. Permet de testé en toute sécurité la selection fait par vos réglage, et le compotement du module de suppréssion.
+## **Mode Sécurisé : (utile pour tester vos réglages)**
+- Mode de sécurité, il demande à l'utilisateur une confirmation pour la suppression du(des) torrent(s).
+> Utilisable uniquement si vous lancé le script sans docker. Permet de tester en toute sécurité la sélection résultant de vos réglages, et le compotement du module de suppression.
 
-> Utilisateur docker, Bien verifies que l'option est désactivé (False): Sinon sa plante ^^
+> Utilisateur docker. Bien verifier que l'option soit désactivée (False): Autrement le programme plante ^^
 ```yml
 safe: False
 ```
 | Options | States | Description |
 |:------|------|--------|
-| **True** | Activé | Prompt une confimation en console |
-| **False** | Désactivé | Ne demande pas de confirmation, supprime si tout les paramétre sont réunie |
+| **True** | Activé | Demande à l'utilisateur une confimation en console |
+| **False** | Désactivé | Ne demande pas de confirmation, et supprime si tous les paramètres sont réunis |
 
 ## **Intervalle entre les exécutions du programme:**
-- Réglage de l'intervale d'exécution du programme.
+- Réglage de l'intervalle d'exécution du programme.
 ```yml
 interval: 15
 ```
 | Options | Exemples | Description |
 |:------|------|--------|
-| **interval:** | 15 | Le script vas s'executé et tout les 15 min |
+| **interval:** | 15 | Le script va se ré-exécuter automatiquement toutes les 15 minutes |
 
 ## **Fixe For qBitorrent-NoX Api:**
-- Si vous utilisé une version de qbittorrent-nox en pkg, elle n'a pas été mise a jour depuis +1ans... Je vous conseille d'en changé. Toutefois, si vous voulez restez dessus activé cette option a défein de compatibilité avec les ancienne version d'api.
-> Sachez que la reconaissance des torrent public sera moin préssise. Tout comme le temps de seed real ( donc prévoir de la marge pour les H&R )...
+- Si vous utilisez une version de qbittorrent-nox en pkg, elle n'a pas été mise a jour depuis plus d'un an... Je vous conseille d'en changer en utilisant le système docker. Toutefois, si vous voulez restez dessus, activez cette option a des fins de compatibilité avec les anciennes versions de l'API.
+> Sachez que la reconaissance des torrents publics sera moins précise, tout comme le temps de seed réel ( donc prévoir de la marge pour les H&R )...
 ```yml
 fix: False
 ```
@@ -184,22 +184,22 @@ fix: False
 | **True** | Activé | Fix de compatibilité activé |
 | **False** | Désactivé | \<default> |
 
-## **Compt a rebour - Goody pour les utilsateur HORS DOCKER:**
-- En consol vous aurait un compt a reboure entre chaque exéction du script dans le logging info
-> A désactivé pour docker, sa ne géne pas vraiment, mais les service comme portainer qui stream un log console n'aime pas trop.
+## **Compte a rebours - Goody pour les utilisateurs HORS DOCKER:**
+- En console vous aurez un compte a rebours entre chaque exécution du script dans le logging info
+> A désactiver pour docker. Dans l'absolu, ce n'est pas gênant, mais les service comme portainer qui envoient des logs en temps réel n'apprécient pas vraiment.
 ```yml
 countdown: False
 ```
 | Options | States | Description |
 |:------|------|--------|
-| **True** | Activé | Pour les utilisateur console |
+| **True** | Activé | Pour les utilisateurs sur console |
 | **False** | Désactivé | \<default> |
 
-## **Suppression automatique des Torrent Public et/ou de certain Tag: \<BETA>**
-- Supprime automatiquement les torrent Public ou/et qui ont des tags ou catégories Prioritaire de votre seedbox aprés un certain temps de seed. Cette option bypass le control d'espace disque, donc que vous ayés de la place ou non les torrents seront supprimé si il réunisse les condition.
+## **Suppression automatique des torrents publics et/ou de certains Tags: \<BETA>**
+- Supprime automatiquement les torrents publics ou/et qui ont des tags ou catégories Prioritaire de votre seedbox après un certain temps de seed. Cette option bypass le contrôle d'espace disque, donc que vous ayez de la place ou non, les torrents concernés seront supprimés si ils réunissent les conditions.
 > L'option Public est destiné a ceux qui ont un service de syncronisation (rclone ou rsync) en place qui aura aux préalable fait une copy de vos fichier sur cloud ou sur un espace de stockage automatiquement.
 
-> Pour la suppréssion par tags ou catégory veullez a saugardez vos fichier avant de tagé le torrent munuellement.
+> Pour la suppression par tags ou catégorie veillez a sauvegarder vos fichiers avant de tagger le torrent manuellement.
 
 ```yml
 autoSupp:
@@ -211,40 +211,40 @@ autoSupp:
 
 | Options | States | Description |
 |:------|------|--------|
-| **True** | Activé | Vas automatiquement supprimé les torrent public |
+| **True** | Activé | Va automatiquement supprimer les torrent publics |
 | **False** | Désactivé | \<default> |
 - `priority:`
 
 | Options | States | Description |
 |:------|------|--------|
-| **True** | Activé | Vas automatiquement supprimé les torrent qui on un tags ou une catégorie prioritaire |
+| **True** | Activé | Va automatiquement supprimer les torrents qui ont un tag ou une catégorie prioritaire |
 | **False** | Désactivé | \<default> |
 - `minSeedTime: 2`
 
 | Options | Exemples | Description |
 |:------|------|--------|
-| **minSeedTime:** | 2 | Temps de seed en heurs minimum du torrent avant de prendre en compte l'auto supréssion |
+| **minSeedTime:** | 2 | Temps de seed en heure minimum du torrent avant de prendre en compte l'auto-supression |
 
 ## **Notification Discord:**
-- Paramétrage des Notification sur discord
-> Utilise un Webhook pour envoyé les notifs sur un salon.
+- Paramétrage des notifications sur discord
+> Utilise un Webhook pour envoyer les notifications émanant du serveur vers un salon textuel.
 ```yml
 discord:
-  use: False # True = Yes, False = Non
+  use: False # True = Oui/Yes, False = Non/No
   webhook: "https://discord.com/api/webhooks/8345$$$$$$$$92500/Hq0K$$$$$$$$$$$$$$$2-5"
 ```
 ### Activation:
 | Options | States | Description |
 |:------|------|--------|
-| **True** | Activé | Envoie les notification |
+| **True** | Activé | Envoie les notifications |
 | **False** | Désactivé | \<default> |
 ### Webhook
 | Options | Exemples | Description |
 |:------|------|--------|
-| **webhook:** | `"url"` | Lien du Webhook, se référé a google pour savoir comment l'obtenir :) |
+| **webhook:** | `"url"` | Lien du Webhook. Se référer a google pour savoir comment l'obtenir :) |
 
 ## **Paramètres pour le tri et la sélection des torrents à supprimer en priorité :**
-- Enssemble de setting qui influe sur la sélection des torrent a supprimé. Lorsque votre espace disque définie est dépassé.
+- Ensemble de paramètres qui influent sur la sélection des torrents à supprimer lorsque critère défini plus haut est atteint (% ou Gb).
 
 ```yml
 min_SeedTime: 80
@@ -255,23 +255,23 @@ min_Ratio: 0
 ### Temps de Seed Minimum:
 | Options | Exemples | Description |
 |:------|------|--------|
-| **min_SeedTime:** | 80 | Temps de seed minimum en heurs du torrent avant de le prendre en compte |
+| **min_SeedTime:** | 80 | Temps de seed minimum en heure du torrent avant de le prendre en compte |
 ### publicPriority:
 | Options | States | Description |
 |:------|------|--------|
-| **True** | Activé | Fait passé en priorité les torrents public, peut import qu'il match avec les autre paramétre défini |
+| **True** | Activé | Fait passer en priorité les torrents publics, peut importe s'ils matchent avec les autres paramètres définis |
 | **False** | Désactivé | \<default> |
 ### Nombre Minimum de seeder:
 | Options | Exemples | Description |
 |:------|------|--------|
-| **countSeeder:** | 30 | Nombre minimum de seeder restant sur le torrent avant de le prendre en compte pour la suppréssion |
+| **countSeeder:** | 30 | Nombre minimum de seeders restant sur le torrent avant de le prendre en compte pour la suppression |
 ### Ratio Minimum:
 | Options | Exemples | Description |
 |:------|------|--------|
-| **min_Ratio:** | 0 | Ratio minimum sur le torrent avant de le prendre en compte pour la suppréssion |
+| **min_Ratio:** | 0 | Ratio minimum sur le torrent avant de le prendre en compte pour la suppression |
 
-## Définition des Tags et étiquettes :
-Les **étiquettes** aka **Tags** doivent etre défini manuellement, elle sont senssible a la case donc `"MonTags"` et different de `"montags"`. Et doivent etre entouré de `" "`
+## Définition des Tags et étiquettes (Labels) :
+Les **étiquettes** aka **Tags** doivent être définies manuellement. Elle sont sensibles à la casse (minuscules/majuscules) donc `"MonTags"` est différent de `"montags"`. Et doivent être encadrés de `" "`
 ```yml
 Torrents_Tags:
   priority:
@@ -298,26 +298,26 @@ Torrents_Category:
 
 | Options | Def. |
 |:------|------|
-| **Torrents_Tags:** | Pour définire les Tag |
-| **Torrents_Category:** | Pour définire les Catégories |
+| **Torrents_Tags:** | Pour définir les Tag |
+| **Torrents_Category:** | Pour définir les Catégories |
 
 - Le script distingue 3 types de tags et/ou catégories:
-    - **Prioritaire:** Haute prioriter sur la séléction = `priority:`
-    > Et utilisé notament par le processuce de supprétion automatique.
-    - **Préferé:** Fait passé les torrent en haut de la liste dans le processuse de séléction. Mais aprés les prioritaire = `prefer:`
-    > N'est pas prit en compte dans la suppréssion automatique.
+    - **Prioritaire:** Haute priorité sur la sélection = `priority:`
+    > Est utilisée notament par le processus de suppression automatique.
+    - **Préferé:** Fait passer les torrents en haut de la liste dans le processus de sélection, mais après les prioritaires = `prefer:`
+    > N'est pas pris en compte dans la suppression automatique.
     - **Exclusion:** Ne prend pas du tout en compte le torrent. = `exclud:`
-    > Surplombe tout, que le torrent soit public ou non et que la suppréssion automatique soit activé ou non, le torrent ne sera PAS sélétioné ni supprimé par le script
+    > Surplombe tout, que le torrent soit public ou non et que la suppression automatique soit activée ou non, le torrent ne sera PAS sélectionné ni supprimé par le script
 
 
 ---
 # Logging :
 
-Le log qui rapport le processuce de séléction des torrent a supprimé se trouvent dans le fichier : 
+Le log qui enregistre le processus de sélection des torrents à supprimer se trouve dans le fichier : 
 
 `log/torrentSlection.log`
 
-Le log de suivie générale sr trouvent dans le fichier : 
+Le log de suivi général se trouve dans le fichier : 
 
 `log/qbAutoDelt.log`
 
