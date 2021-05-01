@@ -31,29 +31,37 @@ disk_Usage_By_GiB:
 
 ## Safe mode mettre True pour: Mode de sécurité, il prompt l'utilisateur pour une confirmation de suppression du torrent.
 
-safe: True # False
+safe: False # False
+
+## Fixe For qBitorrent-NoX Api version if 2.2 set True,
+
+fix: False
+
+## CountDown in consol set to False for Docker user
+
+countdown: False
 
 ## Intervalle entre les exécutions du programme en minute
 
 interval: 15
 
-## Paramètres pour le tri et la sélection des torrents à supprimer en priorité :
+## Suppression automatique des torrent tag priority ou public.
 
+autoSupp:
+  public: False
+  priority: True
+  minSeedTime: 2
+
+#########
+## Paramètres pour le tri et la sélection des torrents à supprimer en priorité :
+#########
+##
 
 min_SeedTime: 80 # A exprimer en heures
 
 ## Automatique Public Tracker Priority with ignore seeding time condition. Buggy for lower api Version
 
 publicPriority: True
-
-## Suppression automatique des torrent tag priority ou public.
-
-autoSupp:
-  public: True
-  priority: True
-  minSeedTime: 2
-
-
 ## Nombre minimum de seeder sur les torrent a supprimé
 
 countSeeder: 30
@@ -67,24 +75,24 @@ min_Ratio: 0 # Ratio O = null
 Torrents_Tags:
   priority:
     - "PUBLIC"
-    - "TODELT"
+    - "TODELETE"
   prefer:
-    - "YGG"
-    - "CASA"
+    - "PRIO"
+    - "TOBAD"
   exclud:
     - "DONOT"
     - "PERSO"
 
 Torrents_Category:
   priority:
-    - "PUBLIC"
-    - "TODELT"
+    - "Remux"
+    - "Trash"
   prefer:
     - "radarr"
     - "tv-sonarr"
   exclud:
-    - "DONOT"
-    - "PERSO"
+    - "KeepFolder"
+    - "Perso"
 
 ## Etat des torrent a exclure
 
@@ -101,14 +109,5 @@ Torrent_States:
 ## Discord, droit etre activé avec True et l'url du webhook pour les notification :
 
 discord:
-  use: True # True = Yes, False = Non
-  webhook: "https://discord.com/api/webhooks/834590737935892500/Hq0KEvTzYJcU58VamGynQtfURoSVCZ3BfyVV2bnVn7Ui-xbIISpExmpKOH5DPMPo42-5"
-
-
-## Fixe For qBitorrent-NoX Api version if 2.2 set True,
-
-fix: False
-
-## CountDown in consol set to False for Docker user
-
-countdown: False
+  use: False # True = Yes, False = Non
+  webhook: "https://discord.com/api/webhooks/834590*********VamGynQtfURoSVCZ3BfyVV2*********IISpExmpKOH5DPMPo42-5"

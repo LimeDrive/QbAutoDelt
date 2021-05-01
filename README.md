@@ -211,7 +211,7 @@ autoSupp:
 
 | Options | Exemples | Description |
 |:------|------|--------|
-| **minSeedTime:** | 2 | Temps de seed minimum du torrent avant de prendre en compte l'auto supréssion |
+| **minSeedTime:** | 2 | Temps de seed en heurs minimum du torrent avant de prendre en compte l'auto supréssion |
 
 ## **Notification Discord:**
 - Paramétrage des Notification sur discord
@@ -229,7 +229,7 @@ discord:
 ### Webhook
 | Options | Exemples | Description |
 |:------|------|--------|
-| **webhook:** | `"https://discord.com/api/webhooks/8345$$$$$$$$92500/Hq0K$$$$$$$$$$$$$$$2-5"` | Lien du Webhook, se référé a google pour savoir comment l'obtenir :) |
+| **webhook:** | `"url"` | Lien du Webhook, se référé a google pour savoir comment l'obtenir :) |
 
 ## **Paramètres pour le tri et la sélection des torrents à supprimer en priorité :**
 - Enssemble de setting qui influe sur la sélection des torrent a supprimé. Lorsque votre espace disque définie est dépassé.
