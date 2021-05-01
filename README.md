@@ -94,7 +94,7 @@ qBittorrent:
   password: "adminadmin"
 ```
 | Options | Exemples | Description |
-|:------|:------|--------:|
+|:------|:------|--------|
 | **host:** | "127.0.0.1:8080" | \<hostIP>:\<port> |
 | **user:** | "admin" | \<WebUI User Name> |
 | **pass:** | "adminamin" | \<WebUI Password> |
@@ -110,10 +110,10 @@ ___
 ```yml
 ControlMethode: True
 ```
-| Options | Description |
-|:------|--------:|
-| **True** | Déclanchement de la suppréssion quand il ne reste que xx GiB d'espace libre sur votre disque |
-| **False** | Déclanchement de la suppréssion quand vous dépassé XX % d'espace disque |
+| Options | Methode | Description |
+|:------|------|--------|
+| **True** | GiB |Déclanchement de la suppréssion quand il ne reste que xx GiB d'espace libre sur votre disque |
+| **False** | % |Déclanchement de la suppréssion quand vous dépassé XX % d'espace disque |
 
 ### **Réglages des option inérante a la méthode de contrôle :**
 > Si **ControlMethode: False**
@@ -124,7 +124,7 @@ disk_Usage_By_Percent:
   path: "./"
 ```
 | Options | Exemples | Description |
-|:------|:------|--------:|
+|:------|------|--------|
 | **max:** | 80 | limite en % d'espace disque avant le déclanchement du script de supréssion |
 | **path:** | "./" | Path a surveillé, peut etre la racine de votre partition, ou le path de votre montage du dossier de téléchargement si vous utilisé docker. |
 
@@ -136,8 +136,167 @@ disk_Usage_By_GiB:
   val: 35
 ```
 | Options | Exemples | Description |
-|:------|:------|--------:|
+|:------|------|--------|
 | **val:** | 35 | limite en GiB d'espace disque restant avant le déclanchement du script de supréssion |
+
+## **Mode Sécurisé : (utile pour testé vos réglage)**
+- Mode de sécurité, il prompt l'utilisateur pour une confirmation de suppression du torrent.
+> Utilisable uniquement si vous lancé le script sans docker. Permet de testé en toute sécurité la selection fait par vos réglage, et le compotement du module de suppréssion.
+
+> Utilisateur docker, Bien verifies que l'option est désactivé (False): Sinon sa plante ^^
+```yml
+safe: False
+```
+| Options | States | Description |
+|:------|------|--------|
+| **True** | Activé | Prompt une confimation en console |
+| **False** | Désactivé | Ne demande pas de confirmation, supprime si tout les paramétre sont réunie |
+
+## **Intervalle entre les exécutions du programme:**
+- Réglage de l'intervale d'exécution du programme.
+```yml
+interval: 15
+```
+| Options | Exemples | Description |
+|:------|------|--------|
+| **interval:** | 15 | Le script vas s'executé et tout les 15 min |
+
+## **Fixe For qBitorrent-NoX Api:**
+- Si vous utilisé une version de qbittorrent-nox en pkg, elle n'a pas été mise a jour depuis +1ans... Je vous conseille d'en changé. Toutefois, si vous voulez restez dessus activé cette option a défein de compatibilité avec les ancienne version d'api.
+> Sachez que la reconaissance des torrent public sera moin préssise. Tout comme le temps de seed real ( donc prévoir de la marge pour les H&R )...
+```yml
+fix: False
+```
+| Options | States | Description |
+|:------|------|--------|
+| **True** | Activé | Fix de compatibilité activé |
+| **False** | Désactivé | \<default> |
+
+## **Compt a rebour - Goody pour les utilsateur HORS DOCKER:**
+- En consol vous aurait un compt a reboure entre chaque exéction du script dans le logging info
+> A désactivé pour docker, sa ne géne pas vraiment, mais les service comme portainer qui stream un log console n'aime pas trop.
+```yml
+countdown: False
+```
+| Options | States | Description |
+|:------|------|--------|
+| **True** | Activé | Pour les utilisateur console |
+| **False** | Désactivé | \<default> |
+
+## **Suppression automatique des Torrent Public et/ou de certain Tag: \<BETA>**
+- Supprime automatiquement les torrent Public ou/et qui ont des tags ou catégories Prioritaire de votre seedbox aprés un certain temps de seed. Cette option bypass le control d'espace disque, donc que vous ayés de la place ou non les torrents seront supprimé si il réunisse les condition.
+> L'option Public est destiné a ceux qui ont un service de syncronisation (rclone ou rsync) en place qui aura aux préalable fait une copy de vos fichier sur cloud ou sur un espace de stockage automatiquement.
+
+> Pour la suppréssion par tags ou catégory veullez a saugardez vos fichier avant de tagé le torrent munuellement.
+
+```yml
+autoSupp:
+  public: False
+  priority: True
+  minSeedTime: 2
+```
+- `public:`
+
+| Options | States | Description |
+|:------|------|--------|
+| **True** | Activé | Vas automatiquement supprimé les torrent public |
+| **False** | Désactivé | \<default> |
+- `priority:`
+
+| Options | States | Description |
+|:------|------|--------|
+| **True** | Activé | Vas automatiquement supprimé les torrent qui on un tags ou une catégorie prioritaire |
+| **False** | Désactivé | \<default> |
+- `minSeedTime: 2`
+
+| Options | Exemples | Description |
+|:------|------|--------|
+| **minSeedTime:** | 2 | Temps de seed minimum du torrent avant de prendre en compte l'auto supréssion |
+
+## **Notification Discord:**
+- Paramétrage des Notification sur discord
+> Utilise un Webhook pour envoyé les notifs sur un salon.
+```yml
+discord:
+  use: False # True = Yes, False = Non
+  webhook: "https://discord.com/api/webhooks/8345$$$$$$$$92500/Hq0K$$$$$$$$$$$$$$$2-5"
+```
+### Activation:
+| Options | States | Description |
+|:------|------|--------|
+| **True** | Activé | Envoie les notification |
+| **False** | Désactivé | \<default> |
+### Webhook
+| Options | Exemples | Description |
+|:------|------|--------|
+| **webhook:** | `"https://discord.com/api/webhooks/8345$$$$$$$$92500/Hq0K$$$$$$$$$$$$$$$2-5"` | Lien du Webhook, se référé a google pour savoir comment l'obtenir :) |
+
+## **Paramètres pour le tri et la sélection des torrents à supprimer en priorité :**
+- Enssemble de setting qui influe sur la sélection des torrent a supprimé. Lorsque votre espace disque définie est dépassé.
+
+```yml
+min_SeedTime: 80
+publicPriority: False
+countSeeder: 30
+min_Ratio: 0
+```
+### Temps de Seed Minimum:
+| Options | Exemples | Description |
+|:------|------|--------|
+| **min_SeedTime:** | 80 | Temps de seed minimum en heurs du torrent avant de le prendre en compte |
+### publicPriority:
+| Options | States | Description |
+|:------|------|--------|
+| **True** | Activé | Fait passé en priorité les torrents public, peut import qu'il match avec les autre paramétre défini |
+| **False** | Désactivé | \<default> |
+### Nombre Minimum de seeder:
+| Options | Exemples | Description |
+|:------|------|--------|
+| **countSeeder:** | 30 | Nombre minimum de seeder restant sur le torrent avant de le prendre en compte pour la suppréssion |
+### Ratio Minimum:
+| Options | Exemples | Description |
+|:------|------|--------|
+| **min_Ratio:** | 0 | Ratio minimum sur le torrent avant de le prendre en compte pour la suppréssion |
+
+## Définition des Tags et étiquettes :
+Les **étiquettes** aka **Tags** doivent etre défini manuellement, elle sont senssible a la case donc `"MonTags"` et different de `"montags"`. Et doivent etre entouré de `" "`
+```yml
+Torrents_Tags:
+  priority:
+    - "PUBLIC"
+    - "TODELETE"
+  prefer:
+    - "PRIO"
+    - "TOBAD"
+  exclud:
+    - "DONOT"
+    - "PERSO"
+
+Torrents_Category:
+  priority:
+    - "Remux"
+    - "Trash"
+  prefer:
+    - "radarr"
+    - "tv-sonarr"
+  exclud:
+    - "KeepFolder"
+    - "Perso"
+```
+
+| Options | Def. |
+|:------|------|
+| **Torrents_Tags:** | Pour définire les Tag |
+| **Torrents_Category:** | Pour définire les Catégories |
+
+- Le script distingue 3 types de tags et/ou catégories:
+    - **Prioritaire:** Haute prioriter sur la séléction = `priority:`
+    > Et utilisé notament par le processuce de supprétion automatique.
+    - **Préferé:** Fait passé les torrent en haut de la liste dans le processuse de séléction. Mais aprés les prioritaire = `prefer:`
+    > N'est pas prit en compte dans la suppréssion automatique.
+    - **Exclusion:** Ne prend pas du tout en compte le torrent. = `exclud:`
+    > Surplombe tout, que le torrent soit public ou non et que la suppréssion automatique soit activé ou non, le torrent ne sera PAS sélétioné ni supprimé par le script
+
 
 ---
 # Logging :
