@@ -6,7 +6,7 @@ services:
         container_name: qbautodelt
         image: limedrive/qbautodelt:latest
         environment:
-            - PYTHON_QBITTORRENTAPI_DO_NOT_VERIFY_WEBUI_CERTIFICATE: True
+            - PYTHON_QBITTORRENTAPI_DO_NOT_VERIFY_WEBUI_CERTIFICATE=true
         volumes:
             - 'path/to/config/:/qb-auto-delt/config'
             - 'path/to/log:/qb-auto-delt/log'
