@@ -299,14 +299,18 @@ def score_Torrent(torrentsInfo):
 
 
 def supp_Torrent_Auto_Tagged(torrentCheck, torrentsInfo):
+
     time.sleep(3)
+    safeMode = cfg["safe"]
     torrentData = torrentCheck
+    
     for torrent in torrentData:
         torrentSelected = torrentData[torrent]
         sizeTorrent = int(torrentSelected[1])
-        safeMode = safe_Mode(torrentSelected, sizeTorrent)
-        if not safeMode:
-            break
+        answer = safe_Mode(torrentSelected, sizeTorrent)
+        if safeMode:
+            if not answer:
+                break
         qbt.torrents_delete(delete_files=True,
                             torrent_hashes=torrent)
         logger.info(
@@ -342,18 +346,23 @@ def safe_Mode(torrentSelected, sizeTorrent):
 
 
 def supp_Disk_Usage(ctrlState, torrentsInfo):
+    
     time.sleep(3)
+    
+    safeMode = cfg["safe"]
     dataScored = score_Torrent(torrentsInfo)
     for_Sorted_Dict(dataScored)
     totalRemove = 0
+    
     # Deleting loop
     if dataScored:
         while totalRemove < ctrlState:
             torrentSelected = max(dataScored, key=dataScored.get)
             sizeTorrent = int(torrentSelected[1])
-            safeMode = safe_Mode(torrentSelected, sizeTorrent)
-            if not safeMode:
-                break
+            answer = safe_Mode(torrentSelected, sizeTorrent)
+            if safeMode:
+                if not answer:
+                    break
             qbt.torrents_delete(delete_files=True,
                                 torrent_hashes=torrentSelected[2])
             logger.info(
