@@ -34,7 +34,7 @@ ___
 
 - Assurez vous d'avoir Python 3
 - Clonez le repos git
-- Editez vos préférences et paramétrez votre configuration dans qb-auto-delt.config.yml
+- Editez vos préférences et paramétrez votre configuration dans **`config/GeneralSetting.yml`** et **`config/TorrentsSelectionSetting.yml`**
 - Ouvrez une console dans le dossier cloné précédemment.
 - Installez les dépandance et lancez le script via les 2 commandes ci-dessous :
 ```zsh
@@ -49,7 +49,7 @@ python3 main.py
 
 * Créez un repertoire **_config/_** et un répertoire **_log/_** qui vont être montés dans votre docker.
 
-* Récupérez les fichiers yml *qb-auto-delt.config.yml* et placez le dans le dossier :`/config`
+* Récupérez les fichiers **`config/GeneralSetting.yml`** et **`config/TorrentsSelectionSetting.yml`** et placez le dans le dossier :`/config`
 
  `curl -LJO https://raw.githubusercontent.com/LimeDrive/qb-auto-delt/master/config/GeneralSetting.yml `
  `curl -LJO https://raw.githubusercontent.com/LimeDrive/qb-auto-delt/master/config/TorrentsSelectionSetting.yml `
