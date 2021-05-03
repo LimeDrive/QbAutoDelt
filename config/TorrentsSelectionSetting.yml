@@ -1,0 +1,58 @@
+---
+## Minimum Seed Time before Selection :
+min_SeedTime: 80
+
+## Minimum amount of seeder for selection :
+countSeeder: 20
+
+## Public Torrents Bypass Rules
+publicPriority: True
+
+## Minimum Ratio for selection :
+min_Ratio: 0
+
+## Torrents Tags :
+Torrents_Tags:
+  priority:
+    - "ToSupp"
+    - "TODELETE"
+  prefer:
+    - "Prio"
+    - "ToBaD"
+  exclud:
+    - "DoNot"
+    - "perso"
+
+## Torrents Category :
+Torrents_Category:
+  priority:
+    - "Remux"
+    - "Trash"
+  prefer:
+    - "radarr"
+    - "tv-sonarr"
+  exclud:
+    - "KeepFolder"
+    - "Perso"
+
+## Scorring Calcuation, default: Piority to the torrents that have lots of seeder. ( useless to have it on a seedbox )
+
+  # You could give some priority to the seedtime, ratio and popularity by playing with this setting.
+  # Exemples to use this setting Base are always = 10
+  ## Torrent with ratio 3 on seed since 7 days and with 100 active seeder on it
+  ### 10 + (7 x 0,5) + ( 3 x 2 ) + ( 100 x 0.1 ) = 29,5
+  ## Torrent with ratio 3 on seed since 20 days and with 50 active seeder on it
+  ### 10 + (20 x 0,5) + ( 3 x 2 ) + ( 50 x 0.1 ) = 31 ### SeedTime Wine
+  ## Torrent with ratio 6 on seed since 7 days and with 100 active seeder on it
+  ### 10 + (7 x 0,5) + ( 6 x 2 ) + ( 100 x 0.1 ) = 35,5 ### ratio Wine
+  ## Torrent with ratio 3 on seed since 7 days and with 400 active seeder on it
+  ### 10 + (7 x 0,5) + ( 1 x 2 ) + ( 400 x 0.1 ) = 55,5 ### Active Seeder Wine
+
+Scoring_Calculation:
+  # + 0.5 / day of seed.
+  seed_Time_Score: 0.5
+  # + 2 x Ratio.
+  ratio_Score: 2
+  # + 0.1 / seeder on the torrent.
+  popularity_Score: 0.1
+

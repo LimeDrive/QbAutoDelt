@@ -1,0 +1,47 @@
+---
+## Connection Setting : 
+qBittorrent:
+  host: "127.0.0.1:8080"
+  user: "admin"
+  password: "adminadmin"
+
+## Disk Usage Control Setting:
+ControlMethode: True
+disk_Usage_By_Percent:
+  max: 80 # in %
+  path: "./"
+disk_Usage_By_GiB:
+  val: 120 # in GiB
+
+## Safe Mode Setting
+safe: False
+
+## Api version Setting :
+fix: False
+
+## CountDown Consol Setting :
+countdown: False
+
+## Discord Notification Setting :
+discord:
+  use: False # True = Yes, False = Non
+  webhook: "https://  <url>  "
+
+## Time interval Setting :
+interval: 15
+
+## Auto Deleting Setting :
+autoSupp:
+  public: False
+  priority: True
+  minSeedTime: 3
+
+## Default
+Torrent_States:
+  TorrentStatesToExclud:
+    - "checkingDL"
+    - "allocating"
+    - "checkingResumeData"
+    - "downloading"
+    - "metaDL"
+    - "moving"

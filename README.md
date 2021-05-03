@@ -49,11 +49,13 @@ python3 main.py
 
 * Créez un repertoire **_config/_** et un répertoire **_log/_** qui vont être montés dans votre docker.
 
-* Récupérez le fichier yml *qb-auto-delt.config.yml* et placez le dans le dossier :`/config`
+* Récupérez les fichiers yml *qb-auto-delt.config.yml* et placez le dans le dossier :`/config`
 
-  >  `curl -LJO https://raw.githubusercontent.com/LimeDrive/qb-auto-delt/master/config/qb-auto-delt.config.yml`
+ `curl -LJO https://raw.githubusercontent.com/LimeDrive/qb-auto-delt/master/config/GeneralSetting.yml `
+ `curl -LJO https://raw.githubusercontent.com/LimeDrive/qb-auto-delt/master/config/TorrentsSelectionSetting.yml `
 
-* Editez le pour l'adapter à votre configuration
+
+* Editez les pour les adapter à votre configuration. Voir détaile plus bas. 
 
 * Lancez le containeur docker en montant les volumes comme dans l'exemple donné ci-dessous :
     * `-v /PATH/TO/LOCAL/log:/qb-auto-delt/log`
@@ -91,13 +93,17 @@ docker run -d \
 
 # Configuration du script:
 
-Pour configurer vos préférences, éditez le fichier : 
+Pour configurer vos préférences, éditez les fichiers : 
 
-**`config/qb-auto-delt.config.yml`**
+**`config/GeneralSetting.yml`** et **`config/TorrentsSelectionSetting.yml`**
+
+> Pour tout changements dans `GeneralSetting.yml` il vous faudra relancé le script / docker.
+
+> Les changement dans `TorrentsSelectionSetting.yml`sont prit en compte imédiatement.
 
 ___
 
-## Identifiants pour la webUI de qBittorrent :
+## **Identifiants pour la webUI de qBittorrent : `GeneralSetting.yml`**
 - Mettez vos identifants d'accès a la webUI de qbitorrent :
 ```yml
 qBittorrent:
@@ -114,7 +120,7 @@ qBittorrent:
 
 ___
 
-## Configuration de la méthode de contrôle de l'espace disque et déclanchement de la suppression:
+## **Configuration de la méthode de contrôle de l'espace disque et déclanchement de la suppression: `GeneralSetting.yml`**
 - Le script propose deux méthode de contrôle de l'espace dique restant qui déclenche la/les suppression(s), le contrôle par pourcentage ne dépend pas de l'api de qbittorrent.
 > Seul True est disponible si vous utilisez ce script pour une instance distante (ex: Seedbox)
 > il est conseillé d'utiliser True en docker également, sans quoi vous aurez besoin de monter en volume, votre dossier de téléchargement afin que le script puisse calculer  l'espace disque restant
@@ -151,7 +157,7 @@ disk_Usage_By_GiB:
 |:------|------|--------|
 | **val:** | 35 | limite en GiB d'espace disque restant avant le déclenchement du script de suppression |
 
-## **Mode Sécurisé : (utile pour tester vos réglages)**
+## **Mode Sécurisé : `GeneralSetting.yml` (utile pour tester vos réglages)**
 - Mode de sécurité, il demande à l'utilisateur une confirmation pour la suppression du(des) torrent(s).
 > Utilisable uniquement si vous lancé le script sans docker. Permet de tester en toute sécurité la sélection résultant de vos réglages, et le compotement du module de suppression.
 
@@ -164,7 +170,7 @@ safe: False
 | **True** | Activé | Demande à l'utilisateur une confimation en console |
 | **False** | Désactivé | Ne demande pas de confirmation, et supprime si tous les paramètres sont réunis |
 
-## **Intervalle entre les exécutions du programme:**
+## **Intervalle entre les exécutions du programme: `GeneralSetting.yml`**
 - Réglage de l'intervalle d'exécution du programme.
 ```yml
 interval: 15
@@ -173,7 +179,7 @@ interval: 15
 |:------|------|--------|
 | **interval:** | 15 | Le script va se ré-exécuter automatiquement toutes les 15 minutes |
 
-## **Fixe For qBitorrent-NoX Api:**
+## **Fixe For qBitorrent-NoX Api: `GeneralSetting.yml`**
 - Si vous utilisez une version de qbittorrent-nox en pkg, elle n'a pas été mise a jour depuis plus d'un an... Je vous conseille d'en changer en utilisant le système docker. Toutefois, si vous voulez restez dessus, activez cette option a des fins de compatibilité avec les anciennes versions de l'API.
 > Sachez que la reconaissance des torrents publics sera moins précise, tout comme le temps de seed réel ( donc prévoir de la marge pour les H&R )...
 ```yml
@@ -184,7 +190,7 @@ fix: False
 | **True** | Activé | Fix de compatibilité activé |
 | **False** | Désactivé | \<default> |
 
-## **Compte a rebours - Goody pour les utilisateurs HORS DOCKER:**
+## **Compte a rebours - Goody pour les utilisateurs HORS DOCKER: `GeneralSetting.yml`**
 - En console vous aurez un compte a rebours entre chaque exécution du script dans le logging info
 > A désactiver pour docker. Dans l'absolu, ce n'est pas gênant, mais les service comme portainer qui envoient des logs en temps réel n'apprécient pas vraiment.
 ```yml
@@ -195,7 +201,7 @@ countdown: False
 | **True** | Activé | Pour les utilisateurs sur console |
 | **False** | Désactivé | \<default> |
 
-## **Suppression automatique des torrents publics et/ou de certains Tags: \<BETA>**
+## **Suppression automatique des torrents publics et/ou de certains Tags: `GeneralSetting.yml`\<BETA>**
 - Supprime automatiquement les torrents publics ou/et qui ont des tags ou catégories Prioritaire de votre seedbox après un certain temps de seed. Cette option bypass le contrôle d'espace disque, donc que vous ayez de la place ou non, les torrents concernés seront supprimés si ils réunissent les conditions.
 > L'option Public est destiné a ceux qui ont un service de syncronisation (rclone ou rsync) en place qui aura aux préalable fait une copy de vos fichier sur cloud ou sur un espace de stockage automatiquement.
 
@@ -225,7 +231,7 @@ autoSupp:
 |:------|------|--------|
 | **minSeedTime:** | 2 | Temps de seed en heure minimum du torrent avant de prendre en compte l'auto-supression |
 
-## **Notification Discord:**
+## **Notification Discord: `GeneralSetting.yml`**
 - Paramétrage des notifications sur discord
 > Utilise un Webhook pour envoyer les notifications émanant du serveur vers un salon textuel.
 ```yml
@@ -243,7 +249,7 @@ discord:
 |:------|------|--------|
 | **webhook:** | `"url"` | Lien du Webhook. Se référer a google pour savoir comment l'obtenir :) |
 
-## **Paramètres pour le tri et la sélection des torrents à supprimer en priorité :**
+## **Paramètres pour le tri et la sélection des torrents à supprimer en priorité : `TorrentsSelectionSetting.yml`**
 - Ensemble de paramètres qui influent sur la sélection des torrents à supprimer lorsque critère défini plus haut est atteint (% ou Gb).
 
 ```yml
@@ -270,7 +276,7 @@ min_Ratio: 0
 |:------|------|--------|
 | **min_Ratio:** | 0 | Ratio minimum sur le torrent avant de le prendre en compte pour la suppression |
 
-## Définition des Tags et étiquettes (Labels) :
+## **Définition des Tags et étiquettes (Labels) : `TorrentsSelectionSetting.yml`**
 Les **étiquettes** aka **Tags** doivent être définies manuellement. Elle sont sensibles à la casse (minuscules/majuscules) donc `"MonTags"` est différent de `"montags"`. Et doivent être encadrés de `" "`
 ```yml
 Torrents_Tags:
@@ -310,6 +316,38 @@ Torrents_Category:
     > Surplombe tout, que le torrent soit public ou non et que la suppression automatique soit activée ou non, le torrent ne sera PAS sélectionné ni supprimé par le script
 
 
+## **Définition du calcule de score : ## `TorrentsSelectionSetting.yml`**
+- Ensemble de paramètres qui influent sur la sélection des torrents à supprimer lorsque critère défini plus haut est atteint (% ou Gb). Le script utilise un systeme a points, la base et de 10, le temps de seed, le ratio et la popularité du torrent augmente cette base. Les torrents supprimé en premier sont ceux avec le plus de point.
+```yml
+Scoring_Caculation:
+  seed_Time_Score: 0.5
+  ratio_Score: 2
+  popularity_Score: 0.1
+```
+### Point rapporté par le Temps de Seed:
+| Options | Exemples | Description |
+|:------|------|--------|
+| **seed_Time_Score:** | 0.5 | Multiplicateur du temps de seed, *1 jour de seed et score 0,5 point*  |
+### Point rapporté par la Valeur du Ratio:
+| Options | Exemples | Description |
+|:------|------|--------|
+| **ratio_Score:** | 2 | Multiplicateur du ratio, *2 de ratio est score 4 point*  |
+### Point rapporté par la Popularité du torrent:
+| Options | Exemples | Description |
+|:------|------|--------|
+| **popularity_Score:** | 0.1 | Multiplicateur sur le nombre de seeder actif sur le Torrent, *50 seeder actif et score 5 point*  |
+```yml
+  # Exemples to use this setting Base are always = 10
+  ## Torrent with ratio 3 seeding since 7 days and with 100 active seeder
+  ### 10 + (7 x 0,5) + ( 3 x 2 ) + ( 100 x 0.1 ) = 29,5
+  ## Torrent with ratio 3 on seeding since 20 days and with 50 active seeder
+  ### 10 + (20 x 0,5) + ( 3 x 2 ) + ( 50 x 0.1 ) = 31 ### SeedTime Wine
+  ## Torrent with ratio 6 on seeding since 7 days and with 100 active seeder
+  ### 10 + (7 x 0,5) + ( 6 x 2 ) + ( 100 x 0.1 ) = 35,5 ### ratio Wine
+  ## Torrent with ratio 3 on seeding since 7 days and with 400 active seeder
+  ### 10 + (7 x 0,5) + ( 1 x 2 ) + ( 400 x 0.1 ) = 55,5 ### Active Seeder Wine
+
+```
 ---
 # Logging :
 
