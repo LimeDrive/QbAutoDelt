@@ -27,10 +27,10 @@ init(autoreset=True)
 
 
 @retry(stop=stop_after_attempt(20), after=after_log(logger, logging.WARNING), wait=wait_fixed(340))
-def qBit_Connection(logger, cfg):
+def qBit_Connection(logger, cfgGen):
 
     qbt = qbittorrentapi.Client(
-        host=cfg["qBittorrent"]["host"], username=cfg["qBittorrent"]["user"], password=cfg["qBittorrent"]["password"], VERIFY_WEBUI_CERTIFICATE=False)
+        host=cfgGen["qBittorrent"]["host"], username=cfgGen["qBittorrent"]["user"], password=cfgGen["qBittorrent"]["password"], VERIFY_WEBUI_CERTIFICATE=False)
     try:
         qbt.auth_log_in()
         logger.info(
@@ -49,7 +49,7 @@ def disk_Usage_By_GiB():
 
     logger.debug(
         f"Control method : disk_Usage_By_GiB select, start calculation")
-    limitDiskSpace = cfg["disk_Usage_By_GiB"]["val"]
+    limitDiskSpace = cfgGen["disk_Usage_By_GiB"]["val"]
     infoDisk = qbt.sync.maindata.delta()
     freeDiskSpace = round(
         infoDisk.server_state.free_space_on_disk / 2 ** 30, 2)
@@ -74,9 +74,9 @@ def disk_Usage_By_Percent():
 
     logger.debug(
         "Control method : disk_Usage_By_Percent select... :: start calculation")
-    statDisk = psutil.disk_usage(cfg["disk_Usage_By_Percent"]["path"])
+    statDisk = psutil.disk_usage(cfgGen["disk_Usage_By_Percent"]["path"])
     percentDisk = round(statDisk.percent, 1)
-    percentMax = cfg["disk_Usage_By_Percent"]["max"]
+    percentMax = cfgGen["disk_Usage_By_Percent"]["max"]
     ctrlDisk = True if percentDisk > percentMax else False
 
     if ctrlDisk:
@@ -128,12 +128,12 @@ def for_Sorted_Dict(dict1):
 
 def exclud_Torrent(torrent):
 
-    excludTags = cfg["Torrents_Tags"]["exclud"]
-    excludCats = cfg["Torrents_Category"]["exclud"]
-    excludTorrentStatesToExclud = cfg["Torrent_States"]["TorrentStatesToExclud"]
-    excludSeederCountLimit = cfg["countSeeder"]
-    minTime = cfg["min_SeedTime"] * 60 * 60
-    minRatio = cfg["min_Ratio"]
+    excludTags = cfgSel["Torrents_Tags"]["exclud"]
+    excludCats = cfgSel["Torrents_Category"]["exclud"]
+    excludTorrentStatesToExclud = cfgGen["Torrent_States"]["TorrentStatesToExclud"]
+    excludSeederCountLimit = cfgSel["countSeeder"]
+    minTime = cfgSel["min_SeedTime"] * 60 * 60
+    minRatio = cfgSel["min_Ratio"]
     listlog.debug(f"Torrent : {torrent} ")
     if torrent.tags in excludTags:
         return True
@@ -156,8 +156,8 @@ def is_Public_Torrent(torrent):
     # trackerPublic = convert_To_List(torrent.tracker)
     # trackerCount = 1 if not trackerPublic else len(trackerPublic) For API 2.2
     trackerCount = count_Public_Tracker(torrent)
-    publicInPriority = cfg["publicPriority"]
-    minSeedTime = int(cfg["autoSupp"]["minSeedTime"]) * 60 * 60
+    publicInPriority = cfgSel["publicPriority"]
+    minSeedTime = int(cfgGen["autoSupp"]["minSeedTime"]) * 60 * 60
     if publicInPriority:
         if not trackerCount == 1:
             if seed_Time_Torrent(torrent) > minSeedTime:
@@ -168,7 +168,7 @@ def is_Public_Torrent(torrent):
 
 
 def count_Public_Tracker(torrent):
-    if cfg["fix"]:
+    if cfgGen["fix"]:
         trackerPublic = convert_To_List(torrent.tracker)
         trackerCount = 1 if not trackerPublic else len(trackerPublic)
     else:
@@ -182,7 +182,7 @@ def count_Public_Tracker(torrent):
 
 
 def seed_Time_Torrent(torrent):
-    if cfg["fix"]:
+    if cfgGen["fix"]:
         SeedTime = torrent.time_active
     else:
         SeedTime = torrent.seeding_time
@@ -198,11 +198,11 @@ def torrent_To_Includ(torrent):
     Si torrent a exclur return False
     Si torrent a inclur return True
     """
-    tagsPriority = cfg["Torrents_Tags"]["priority"]
-    categoryPriority = cfg["Torrents_Category"]["priority"]
-    excludTags = cfg["Torrents_Tags"]["exclud"]
-    excludCats = cfg["Torrents_Category"]["exclud"]
-    excludTorrentStatesToExclud = cfg["Torrent_States"]["TorrentStatesToExclud"]
+    tagsPriority = cfgSel["Torrents_Tags"]["priority"]
+    categoryPriority = cfgSel["Torrents_Category"]["priority"]
+    excludTags = cfgSel["Torrents_Tags"]["exclud"]
+    excludCats = cfgSel["Torrents_Category"]["exclud"]
+    excludTorrentStatesToExclud = cfgGen["Torrent_States"]["TorrentStatesToExclud"]
     if list_Contains(convert_To_List(torrent.tags), tagsPriority):
         return True
     elif list_Contains(convert_To_List(torrent.category), categoryPriority):
@@ -226,31 +226,31 @@ def torrent_To_Includ(torrent):
 
 
 def torrent_Check(torrentsInfo):
-
-    minSeedTime = int(cfg["autoSupp"]["minSeedTime"]) * 60 * 60
-    excludTorrentStatesToExclud = cfg["Torrent_States"]["TorrentStatesToExclud"]
-    tagsPriority = cfg["Torrents_Tags"]["priority"]
-    categoryPriority = cfg["Torrents_Category"]["priority"]
-    excludTags = cfg["Torrents_Tags"]["exclud"]
-    excludCats = cfg["Torrents_Category"]["exclud"]
+    
+    minSeedTime = int(cfgGen["autoSupp"]["minSeedTime"]) * 60 * 60
+    excludTorrentStatesToExclud = cfgGen["Torrent_States"]["TorrentStatesToExclud"]
+    tagsPriority = cfgSel["Torrents_Tags"]["priority"]
+    categoryPriority = cfgSel["Torrents_Category"]["priority"]
+    excludTags = cfgSel["Torrents_Tags"]["exclud"]
+    excludCats = cfgSel["Torrents_Category"]["exclud"]
 
     torrentData = dict()
 
     for torrent in torrentsInfo:
         if not torrent.state in excludTorrentStatesToExclud:
             if is_Public_Torrent(torrent):
-                if cfg["autoSupp"]["public"]:
+                if cfgGen["autoSupp"]["public"]:
                     if not list_Contains(convert_To_List(torrent.tags), excludTags):
                         if not list_Contains(convert_To_List(torrent.category), excludCats):
                             torrentInfo = (torrent.name, torrent.size)
                             torrentData[torrent.hash] = torrentInfo
             elif list_Contains(convert_To_List(torrent.tags), tagsPriority):
-                if cfg["autoSupp"]["priority"]:
+                if cfgGen["autoSupp"]["priority"]:
                     if seed_Time_Torrent(torrent) > minSeedTime:
                         torrentInfo = (torrent.name, torrent.size)
                         torrentData[torrent.hash] = torrentInfo
             elif list_Contains(convert_To_List(torrent.category), categoryPriority):
-                if cfg["autoSupp"]["priority"]:
+                if cfgGen["autoSupp"]["priority"]:
                     if seed_Time_Torrent(torrent) > minSeedTime:
                         torrentInfo = (torrent.name, torrent.size)
                         torrentData[torrent.hash] = torrentInfo
@@ -261,28 +261,32 @@ def torrent_Check(torrentsInfo):
 
 
 def score_Torrent(torrentsInfo):
+    
+    minTime = cfgSel["min_SeedTime"] * 60 * 60
+    tagsPriority = cfgSel["Torrents_Tags"]["priority"]
+    categoryPriority = cfgSel["Torrents_Category"]["priority"]
+    tagsPrefer = cfgSel["Torrents_Tags"]["prefer"]
+    categoryPrefer = cfgSel["Torrents_Category"]["prefer"]
+    settSeedScore = cfgSel['Scoring_Calculation']['seed_Time_Score']
+    settRatioScore = cfgSel['Scoring_Calculation']['ratio_Score']
+    settPopScore = cfgSel['Scoring_Calculation']['popularity_Score']
 
-    minTime = cfg["min_SeedTime"] * 60 * 60
-    tagsPriority = cfg["Torrents_Tags"]["priority"]
-    categoryPriority = cfg["Torrents_Category"]["priority"]
-    tagsPrefer = cfg["Torrents_Tags"]["prefer"]
-    categoryPrefer = cfg["Torrents_Category"]["prefer"]
     torrentData = dict()
 
     for torrent in torrentsInfo:
         trackerCount = count_Public_Tracker(torrent)
         publicInPriority = is_Public_Torrent(torrent)
         torrentSelection = torrent_To_Includ(torrent)
-        listlog.info(f"{torrent.name} :: to exclud : {torrentSelection}")
+        listlog.info(f"{torrent.name} :: to includ : {torrentSelection}")
         if torrentSelection:
             scoreSeed = round(seed_Time_Torrent(
                 torrent) / 60 / 60 / 24 * 0.2, 2)
             scoreRatio = round(torrent.ratio, 2)
             scorePopularity = round(torrent.num_complete * 0.1)
-            scoreIsPublic = 10000 if publicInPriority is True else 0
-            scorePriority = 1000 if list_Contains(convert_To_List(torrent.tags), tagsPriority) is True else 1000 if list_Contains(
+            scoreIsPublic = 100000 if publicInPriority is True else 0
+            scorePriority = 10000 if list_Contains(convert_To_List(torrent.tags), tagsPriority) is True else 10000 if list_Contains(
                 convert_To_List(torrent.category), categoryPriority) is True else 0
-            scorePrefer = 200 if list_Contains(convert_To_List(torrent.tags), tagsPrefer) is True else 200 if list_Contains(
+            scorePrefer = 1000 if list_Contains(convert_To_List(torrent.tags), tagsPrefer) is True else 1000 if list_Contains(
                 convert_To_List(torrent.category), categoryPrefer) is True else 0
             torrentInfo = (torrent.name, torrent.size, torrent.hash)
             torrentFinalScore = sum(
@@ -301,7 +305,7 @@ def score_Torrent(torrentsInfo):
 def supp_Torrent_Auto_Tagged(torrentCheck, torrentsInfo):
 
     time.sleep(3)
-    safeMode = cfg["safe"]
+    safeMode = cfgGen["safe"]
     torrentData = torrentCheck
     
     for torrent in torrentData:
@@ -324,7 +328,7 @@ def supp_Torrent_Auto_Tagged(torrentCheck, torrentsInfo):
 
 
 def safe_Mode(torrentSelected, sizeTorrent):
-    if cfg["safe"]:
+    if cfgGen["safe"]:
         named_tuple = time.localtime()  # get struct_time
         time_string = time.strftime(
             "%Y-%m-%d,%H:%M:%S", named_tuple)
@@ -349,7 +353,7 @@ def supp_Disk_Usage(ctrlState, torrentsInfo):
     
     time.sleep(3)
     
-    safeMode = cfg["safe"]
+    safeMode = cfgGen["safe"]
     dataScored = score_Torrent(torrentsInfo)
     for_Sorted_Dict(dataScored)
     totalRemove = 0
@@ -428,13 +432,12 @@ def confirm_Input(question, default="no"):
 
 if __name__ == '__main__':
 
-    # Import from Yaml config/qb-auto-delt.config.yml
-    with open('config/qb-auto-delt.config.yml', 'r') as ymlfile:
-        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+    # General Config:
+    with open('config/GeneralSetting.yml', 'r') as ymlfile:
+        cfgGen = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-    # Discord notify
-    useDiscord = cfg["discord"]["use"]
-    discord = Discord(url=cfg["discord"]["webhook"])
+    useDiscord = cfgGen["discord"]["use"]
+    discord = Discord(url=cfgGen["discord"]["webhook"])
     emb1 = [{"url": "https://github.com/LimeDrive/qb-auto-delt",
              "title": "Disk space Control"}]
     emb2 = [{"url": "https://github.com/LimeDrive/qb-auto-delt",
@@ -442,14 +445,20 @@ if __name__ == '__main__':
 
     # Main loop
     while True:
+        
+        # Torrent Selection Config :
+        with open('config/TorrentsSelectionSetting.yml') as ymlfile:
+            cfgSel = yaml.load(ymlfile, Loader=yaml.FullLoader)
 
-        qbt = qBit_Connection(logger, cfg)
+        qbt = qBit_Connection(logger, cfgGen)
         torrentsInfo = qbt.torrents_info()
         torrentCheck = torrent_Check(torrentsInfo)
         ctrlState = disk_Usage_By_GiB(
-        ) if cfg["ControlMethode"] is True else disk_Usage_By_Percent()
-        interval = cfg['interval']
-
+        ) if cfgGen["ControlMethode"] is True else disk_Usage_By_Percent()
+        interval = cfgGen['interval']
+        # # For Test:
+        # dataScored = score_Torrent(torrentsInfo)
+        # for_Sorted_Dict(dataScored)
         if ctrlState:
             logger.debug(f"Control of ctrlState value : {ctrlState}")
             supp_Disk_Usage(ctrlState, torrentsInfo)
@@ -457,7 +466,7 @@ if __name__ == '__main__':
             logger.debug(
                 f"Control of torrent_Check value : {str(bool(torrentCheck))}")
             supp_Torrent_Auto_Tagged(torrentCheck, torrentsInfo)
-        if cfg["countdown"]:
+        if cfgGen["countdown"]:
             logger.debug(
                 f"{Fore.CYAN}Script will recheck your disk space in - {str(interval)} - minute{Style.RESET_ALL}")
             countdown(int(interval) * 60)
