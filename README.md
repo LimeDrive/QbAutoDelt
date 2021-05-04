@@ -1,4 +1,4 @@
-# Qb-auto-delt   ---   ***alpha phase***   ---
+# Qb-auto-delt
 ***Test only with safe env.***
 
 Can delete some torrent(s) from your seedbox definitly.
