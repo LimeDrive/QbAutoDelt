@@ -262,9 +262,9 @@ def torrent_Check(torrentsInfo):
 def tracker_Is_Prefer(torrent):
     
     trackerPrefer = cfgSel["preferTrackers"]
-    torrentTraker = torrent.tracker    
+    torrentTracker = torrent.tracker
     for i in trackerPrefer:
-        if i in torrentTraker:
+        if i in torrentTracker:
             return True
 
 # Scrore les torrent qui passe tout les test d'inclusion, et retourn un dico avec le score trouvez,
