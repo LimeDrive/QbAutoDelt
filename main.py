@@ -85,8 +85,7 @@ def disk_Usage_By_Percent():
         if useDiscord:
             discord.post(
                 content=f"Disk Space use at {str(percentDisk)}% -  Over than {str(round(percentDisk - percentMax, 2))} %, deleting script start", embeds=emb1, username="Qbittorrent")
-        ctrlDiskOver = (statDisk.total / 100) * \
-            round((percentDisk - percentMax) * 2 ** 30)
+        ctrlDiskOver = ((statDisk.total / 100) * round(percentDisk - percentMax)) * 2 ** 30
         return ctrlDiskOver
     else:
         logger.info(
@@ -256,6 +255,17 @@ def torrent_Check(torrentsInfo):
                         torrentData[torrent.hash] = torrentInfo
     return torrentData
 
+## Check si le tracker et dans la liste des traker préféré.
+
+
+def tracker_Is_Prefer(torrent):
+    
+    trackerPrefer = cfgSel["preferTrackers"]
+    torrentTracker = torrent.tracker
+    for i in trackerPrefer:
+        if i in torrentTracker:
+            return True
+
 # Scrore les torrent qui passe tout les test d'inclusion, et retourn un dico avec le score trouvez,
 # le noms, le hash et le poid des torrents.
 
@@ -288,12 +298,13 @@ def score_Torrent(torrentsInfo):
                 convert_To_List(torrent.category), categoryPriority) is True else 0
             scorePrefer = 1000 if list_Contains(convert_To_List(torrent.tags), tagsPrefer) is True else 1000 if list_Contains(
                 convert_To_List(torrent.category), categoryPrefer) is True else 0
+            trackerIsPrefer = 1000 if tracker_Is_Prefer(torrent) is True else 0
             torrentInfo = (torrent.name, torrent.size, torrent.hash)
             torrentFinalScore = sum(
-                (scoreSeed, scoreRatio, scorePriority, scorePrefer, scoreIsPublic, scorePopularity), 10)
+                (scoreSeed, scoreRatio, scorePriority, scorePrefer, trackerIsPrefer, scoreIsPublic, scorePopularity), 10)
             torrentData[torrentInfo] = torrentFinalScore
             listlog.debug(
-                f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, SeedTime: {str(seed_Time_Torrent(torrent))}/={str(scoreSeed)}, Popularity: {str(scorePopularity)}, Prio: {str(scorePriority)}, Is Public: {str(scoreIsPublic)}, Prefer: {str(scorePrefer)}")
+                f"{torrent.hash} ::: Ratio: {str(torrent.ratio)}/={str(scoreRatio)}, SeedTime: {str(seed_Time_Torrent(torrent))}/={str(scoreSeed)}, Popularity: {str(scorePopularity)}, Prio: {str(scorePriority)}, Is Public: {str(scoreIsPublic)}, Prefer: {str(scorePrefer)}, TrackerIsPrefer: {str(trackerIsPrefer)} ")
             listlog.debug(
                 f"{torrent.name} :: Final Score: {str(torrentFinalScore)}")
     # logger.debug(f"Data update, torrent scored :" + str(torrentData))

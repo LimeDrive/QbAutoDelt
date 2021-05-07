@@ -35,6 +35,9 @@ Torrents_Category:
     - "KeepFolder"
     - "Perso"
 
+preferTrackers:
+  - "connect.p2p-tracker.net"
+
 ## Scorring Calcuation, default: Piority to the torrents that have lots of seeder. ( useless to have it on a seedbox )
 
   # You could give some priority to the seedtime, ratio and popularity by playing with this setting.
