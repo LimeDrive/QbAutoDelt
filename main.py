@@ -85,7 +85,7 @@ def disk_Usage_By_Percent():
         if useDiscord:
             discord.post(
                 content=f"Disk Space use at {str(percentDisk)}% -  Over than {str(round(percentDisk - percentMax, 2))} %, deleting script start", embeds=emb1, username="Qbittorrent")
-        ctrlDiskOver = ((statDisk.total / 100) * round(percentDisk - percentMax)) * 2 ** 30
+        ctrlDiskOver = (statDisk.total / 100) * round(percentDisk - percentMax)
         return ctrlDiskOver
     else:
         logger.info(
