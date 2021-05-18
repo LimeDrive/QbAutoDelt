@@ -367,3 +367,6 @@ FodyWeavers.xsd
 #Pycharm environment
 venv/
 .idea/
+
+#vscode
+.vscode

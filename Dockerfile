@@ -8,4 +8,5 @@ RUN pip install --upgrade pip setuptools && pip install -r requirements.txt
 
 COPY . .
 
-CMD ["python3", "main.py"]
+ENTRYPOINT [ "python" ]
+CMD [ "main.py" ]
