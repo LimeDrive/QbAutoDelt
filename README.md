@@ -103,6 +103,40 @@ Pour configurer vos préférences, éditez les fichiers :
 
 ___
 
+- [Qb-auto-delt](#qb-auto-delt)
+  - [**Script/dockerapp**](#scriptdockerapp)
+- [Installation](#installation)
+  - [Docker et docker-compose (recommandé)](#docker-et-docker-compose-recommandé)
+    - [Création des fichier des répertoires partagés et montage des volumes:](#création-des-fichier-des-répertoires-partagés-et-montage-des-volumes)
+    - [Exemple avec ***docker-compose*** : _(recommandé)_](#exemple-avec-docker-compose--recommandé)
+    - [Exemple avec ***docker run*** :](#exemple-avec-docker-run-)
+- [Configuration du script:](#configuration-du-script)
+  - [**Identifiants pour la webUI de qBittorrent : `GeneralSetting.yml`**](#identifiants-pour-la-webui-de-qbittorrent--generalsettingyml)
+  - [**Configuration de la méthode de contrôle de l'espace disque et déclanchement de la suppression: `GeneralSetting.yml`**](#configuration-de-la-méthode-de-contrôle-de-lespace-disque-et-déclanchement-de-la-suppression-generalsettingyml)
+    - [**Réglages des options inérantes a la méthode de contrôle :**](#réglages-des-options-inérantes-a-la-méthode-de-contrôle-)
+    - [**Qantité d'espace disque restante exprimée en GiB qui déclenche la suppression des torrents.**](#qantité-despace-disque-restante-exprimée-en-gib-qui-déclenche-la-suppression-des-torrents)
+  - [**Mode Sécurisé : `GeneralSetting.yml` (utile pour tester vos réglages)**](#mode-sécurisé--generalsettingyml-utile-pour-tester-vos-réglages)
+  - [**Intervalle entre les exécutions du programme: `GeneralSetting.yml`**](#intervalle-entre-les-exécutions-du-programme-generalsettingyml)
+  - [**Fixe For qBitorrent-NoX Api: `GeneralSetting.yml`**](#fixe-for-qbitorrent-nox-api-generalsettingyml)
+  - [**Compte a rebours - Goody pour les utilisateurs HORS DOCKER: `GeneralSetting.yml`**](#compte-a-rebours---goody-pour-les-utilisateurs-hors-docker-generalsettingyml)
+  - [**Suppression automatique des torrents publics et/ou de certains Tags: `GeneralSetting.yml`\<BETA>**](#suppression-automatique-des-torrents-publics-etou-de-certains-tags-generalsettingymlbeta)
+  - [**Notification Discord: `GeneralSetting.yml`**](#notification-discord-generalsettingyml)
+    - [Activation:](#activation)
+    - [Webhook](#webhook)
+  - [**Paramètres pour le tri et la sélection des torrents à supprimer en priorité : `TorrentsSelectionSetting.yml`**](#paramètres-pour-le-tri-et-la-sélection-des-torrents-à-supprimer-en-priorité--torrentsselectionsettingyml)
+    - [Temps de Seed Minimum:](#temps-de-seed-minimum)
+    - [publicPriority:](#publicpriority)
+    - [Nombre Minimum de seeder:](#nombre-minimum-de-seeder)
+    - [Ratio Minimum:](#ratio-minimum)
+  - [**Définition des Tags et étiquettes (Labels) : `TorrentsSelectionSetting.yml`**](#définition-des-tags-et-étiquettes-labels--torrentsselectionsettingyml)
+  - [**Définition du calcule de score : ## `TorrentsSelectionSetting.yml`**](#définition-du-calcule-de-score---torrentsselectionsettingyml)
+    - [Point rapporté par le Temps de Seed:](#point-rapporté-par-le-temps-de-seed)
+    - [Point rapporté par la Valeur du Ratio:](#point-rapporté-par-la-valeur-du-ratio)
+    - [Point rapporté par la Popularité du torrent:](#point-rapporté-par-la-popularité-du-torrent)
+- [Logging :](#logging-)
+
+__
+
 ## **Identifiants pour la webUI de qBittorrent : `GeneralSetting.yml`**
 - Mettez vos identifants d'accès a la webUI de qbitorrent :
 ```yml
